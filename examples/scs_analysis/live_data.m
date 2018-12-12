@@ -3,13 +3,12 @@ clearvars;
 % User-defined variables:
 Topic_ID = 'south-coast-science-dev/production-test/loc/1/gases';
 sampling_rate = 10; % sensor's sampling rate in seconds
-
-sensor_datetime = 'localised_datetime.py';
+%-------------------------------------------------------------------------------
+% Pre-allocating variables
 localised_datetime_start = cell(1000, 1);
 dataout = cell(1000, 1);
-%data.jsondecode = cell(1000, 1);
-%items_num = fieldnames(data);
-
+%-------------------------------------------------------------------------------
+sensor_datetime = 'localised_datetime.py';
 [~, data.init.datetime] = system(sensor_datetime);
 data.init.datetime = strtrim(data.init.datetime);
 pause(sampling_rate);
@@ -64,7 +63,7 @@ else
     data.parameters.tmp(i, 1) = data.jsondecode{i, 1}.val.sht.tmp;
 end
 
-data.t = datenum(data.parameters.datetime, 'yyyy-mm-ddTHH:MM:SSZ');
+data.t = cellfun(@all_functions.datenum8601, cellstr(data.parameters.datetime));
 
 figure(1);
 plot(data.t, data.parameters.NO2, data.t, data.parameters.CO)
@@ -72,6 +71,9 @@ datetick('x', 'dd-mmm-yy HH:MM','keepticks','keeplimits');
 legend('NO2','CO')
 title(Topic_ID)
 xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
+
+dcm_obj = datacursormode(gcf);
+set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); %Update "Data-Cursor" callback to display datetime x-values.
 end
 
    
