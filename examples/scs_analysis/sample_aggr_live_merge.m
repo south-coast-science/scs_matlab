@@ -20,7 +20,7 @@ hist_cmd = 'aws_topic_history.py %s -s %s | node.py -a';
 data.init.jsondecode = jsondecode(data.init.dataout);
 
 i = 0;
-a=0;
+a = 0;
 while (1)
     
     i = i + 1;
@@ -69,7 +69,7 @@ while (1)
         data.parameters.tmp(i, 1) = data.jsondecode{i, 1}.val.sht.tmp;
     end
     
-    data.t = datenum(data.parameters.datetime, 'yyyy-mm-ddTHH:MM:SSZ');
+    data.t = cellfun(@all_functions.datenum8601, cellstr(data.parameters.datetime));
     
     figure(1);
     plot(data.t, data.parameters.CO) %Specify parameteres to plot live.
@@ -79,7 +79,7 @@ while (1)
     xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
     
     dcm_obj = datacursormode(gcf);
-        set(dcm_obj, 'UpdateFcn',@myfunction); %Update "Data-Cursor" callback to display datetime x-values.
+        set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); %Update "Data-Cursor" callback to display datetime x-values.
     
     if rem(i, User.avg_interval_sec/User.sampling_rate)==0
         
@@ -100,7 +100,7 @@ while (1)
         for x=1:doc_num
             %Define parameters to extract from decoded aggregated data:
             aggr.datetime{a+x-1,1} = aggr.decode{b,2}(x).rec;
-            aggr.t = datenum(aggr.datetime, 'yyyy-mm-ddTHH:MM:SS.FFF');
+            aggr.t = cellfun(@all_functions.datenum8601, cellstr(aggr.datetime));
             aggr.CO(a+x-1,2)= aggr.decode{b,2}(x).val.CO.cnc.mid;
             aggr.CO(a+x-1,1) = aggr.decode{b,2}(x).val.CO.cnc.min;
             aggr.CO(a+x-1,3) = aggr.decode{b,2}(x).val.CO.cnc.max;
@@ -115,15 +115,7 @@ while (1)
         xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
         
         dcm_obj = datacursormode(gcf);
-        set(dcm_obj, 'UpdateFcn',@myfunction); %Update "Data-Cursor" callback to display datetime x-values.
+        set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); %Update "Data-Cursor" callback to display datetime x-values.
     end
 end
 
-%Function to display datetime values on "Data-Cursor" selection
-function output_txt = myfunction(~,dcm_obj)
-pos = get(dcm_obj,'Position');
-output_txt = {['X: ', datestr(pos(1))],['Y: ',num2str(pos(2),4)]};
-if length(pos) > 2
-    output_txt{end+1} = ['Z: ',num2str(pos(3),4)];
-end
-end
