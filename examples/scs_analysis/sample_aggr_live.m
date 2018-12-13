@@ -1,9 +1,9 @@
 clearvars;
 
-%User-defined variables
-Topic_ID = 'south-coast-science-dev/production-test/loc/1/gases';
-sampling_rate = 10; % sensor's sampling rate in seconds
-avg_interval = '**:/1:00';
+% User-defined variables
+Topic_ID = 'south-coast-science-dev/production-test/loc/1/gases'; % Specify subscription topic.
+sampling_rate = 10;                                               % Specify sensor's sampling rate in seconds.
+avg_interval = '**:/1:00';                                        % Specify averaging time interval in required format.
 %------------------------------------------------------------------------------
 sensor_datetime = 'localised_datetime.py';
 [~, data.init.datetime] = system(sensor_datetime);
@@ -47,5 +47,5 @@ while(1)
     xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
     
     dcm_obj = datacursormode(gcf); 
-    set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); %Update "Data-Cursor" callback to display datetime x-values.
+    set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); % Updates "Data-Cursor" callback to display datetime x-values.
 end

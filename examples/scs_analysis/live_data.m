@@ -1,13 +1,13 @@
 clearvars;
 
 % User-defined variables:
-Topic_ID = 'south-coast-science-dev/production-test/loc/1/gases';
-sampling_rate = 10; % sensor's sampling rate in seconds
-%-------------------------------------------------------------------------------
+Topic_ID = 'south-coast-science-dev/production-test/loc/1/gases'; % Specify subscription topic.
+sampling_rate = 10;                                               % Specify sensor's sampling rate in seconds.
+%-------------------------------------------------------------------------------------------------------------
 % Pre-allocating variables
 localised_datetime_start = cell(1000, 1);
 dataout = cell(1000, 1);
-%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------------------------------------
 sensor_datetime = 'localised_datetime.py';
 [~, data.init.datetime] = system(sensor_datetime);
 data.init.datetime = strtrim(data.init.datetime);
@@ -73,7 +73,7 @@ title(Topic_ID)
 xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
 
 dcm_obj = datacursormode(gcf);
-set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); %Update "Data-Cursor" callback to display datetime x-values.
+set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); % Updates "Data-Cursor" callback to display datetime x-values.
 end
 
    
