@@ -1,18 +1,19 @@
 clearvars;
 
+filename = mfilename('fullpath');
+[~, name, ~] = fileparts(filename);
+
 % User-defined variables
 Topic_ID = 'south-coast-science-dev/production-test/loc/1/gases'; % Specify subscription topic.
 sampling_rate = 10;                                               % Specify sensor's sampling rate in seconds.
 avg_interval = '**:/1:00';                                        % Specify averaging time interval in required format.
-%------------------------------------------------------------------------------
+%----------------------------------------------------------------------------------------------------------------------
 sensor_datetime = 'localised_datetime.py';
-[~, data.init.datetime] = system(sensor_datetime);
-data.init.datetime = strtrim(data.init.datetime);
+[~, start_time] = system(sensor_datetime);
+start_time = strtrim(start_time);
 pause(sampling_rate);
-hist_cmd = 'aws_topic_history.py %s -s %s | node.py -a';
-[~, data.init.dataout] = system(sprintf(hist_cmd, Topic_ID, data.init.datetime));
-data.init.jsondecode = jsondecode(data.init.dataout);
-data.init.jsondecode.rec_val = data.init.jsondecode(end).rec;
+data.jsondecode = all_functions.aggr_decode_live_init(Topic_ID, start_time, avg_interval);
+end_time = data.jsondecode(end).rec;
 
 a = 0;
 while(1)
@@ -24,25 +25,24 @@ while(1)
     elseif a>0
         a = a+x;
         b=b+1;
-        data.init.jsondecode.rec_val = aggr.decode{end,2}(end).rec;
+        end_time = aggr.decode{end,2}(end).rec;
     end
     
-    aggr_cmd = 'aws_topic_history.py %s -s %s | sample_aggregate.py -m -c %s val.CO.cnc 1 | node.py -a';
-    [~, aggr.decode{b,1}] = system(sprintf(aggr_cmd, Topic_ID, data.init.jsondecode.rec_val, avg_interval));
-    aggr.decode{b,2} = jsondecode(aggr.decode{b,1});
-   
-    doc_num = length(aggr.decode{end,2});
-    for x=1:doc_num
+    [aggr.decode{b,2}, aggr.decode{b,1}] = all_functions.aggr_decode_live(Topic_ID, end_time, avg_interval, b);
+    
+    % Define parameters extracted from aggregated data:
+    for x=1:length(aggr.decode{end,2})
         aggr.datetime{a+x-1,1} = aggr.decode{b,2}(x).rec;
-        aggr.t = cellfun(@all_functions.datenum8601, cellstr(aggr.datetime));
         aggr.CO(a+x-1,1)= aggr.decode{b,2}(x).val.CO.cnc.mid;
         aggr.COmin(a+x-1,1) = aggr.decode{b,2}(x).val.CO.cnc.min;
         aggr.COmax(a+x-1,1) = aggr.decode{b,2}(x).val.CO.cnc.max;
     end
-    figure(2);
-    plot(aggr.t, aggr.COmax,'k:', aggr.t, aggr.CO,'r', aggr.t, aggr.COmin,'k:')
+    
+    aggr.t = cellfun(@all_functions.datenum8601, cellstr(aggr.datetime)); % Ensure aggr.t refers to the datetime parameter.
+    figure(1);
+    plot(aggr.t, aggr.COmax,'r:', aggr.t, aggr.CO,'r', aggr.t, aggr.COmin,'r:')
     datetick('x', 'dd-mmm-yy HH:MM','keepticks','keeplimits');
-    legend('max', 'mid', 'min')
+    legend('CO max', 'CO mid', 'CO min')
     title(Topic_ID)
     xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
     

@@ -84,7 +84,7 @@ while (1)
         end
         %Aggregated data import/decode:
         [aggr.decode{b,2}, aggr.decode{b,1}] = all_functions.aggr_decode_live(Topic_ID, start_time,...
-            start_time_aggr, avg_interval, avg_ratio, a, b, i);
+            start_time_aggr, avg_interval, avg_ratio a, b, i);
         
         for x=1:length(aggr.decode{end,2})
             %Define parameters to extract from decoded aggregated data:

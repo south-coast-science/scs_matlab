@@ -278,17 +278,15 @@ classdef all_functions
             json_decode = jsondecode(aggr_out);
         end
         %-----------------------------------------------------------------------------------------
-        function [json_decode, aggr_decode] = aggr_decode_live_merge(Topic_ID, start_time, start_time_aggr, avg_interval, avg_ratio, a, b, i)
+        function [json_decode, aggr_decode] = aggr_decode_live_merge(Topic_ID, start_time, start_time_aggr, avg_interval, a, b, i)
             aggr_cmd = 'aws_topic_history.py %s -s %s | sample_aggregate.py -m -c %s val | node.py -a';
-            if a==0 && rem(i, avg_ratio)==0
+            if a==0 && rem(i, avg_interval_sec/sampling_rate)==0
                 [~, aggr_decode{b,1}] = system(sprintf(aggr_cmd, Topic_ID, start_time, avg_interval));
             elseif a>1 && rem(i, avg_interval_sec/sampling_rate)==0
-                [~, aggr_decode{b,1}] = system(sprintf(aggr_cmd, Topic_ID, start_time_aggr, avg_interval));
-            else
-                [~, aggr_decode{b,1}] = system(sprintf(aggr_cmd, Topic_ID, end_time, avg_interval)); 
+                [~, aggr_decode{b,1}] = system(sprintf(aggr_cmd, Topic_ID, start_time_aggr, avg_interval));                
             end
-            json_decode = jsondecode(aggr_decode{b,1});
-            aggr_decode = aggr_decode{b,1};
+                json_decode = jsondecode(aggr_decode{b,1});
+                aggr_decode = aggr_decode{b,1};
         end
         %-----------------------------------------------------------------------------------------
         function [json_decode, aggr_decode] = aggr_decode_live(Topic_ID, end_time, avg_interval, b)

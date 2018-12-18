@@ -1,44 +1,57 @@
 clearvars;
 
 %User-defined variables:
-API_key='api-key de92c5ff-b47a-4cc4-a04c-62d684d74a1f';
-Topic_ID='south-coast-science-dev/production-test/loc/1/gases';
-Time_interval='2018-10-26T09:35:00+01:00/2018-10-26T10:40:00+01:00';
-%---------------------------------------------------------------------------------
-command='curl -s -H "Authorization: %s" https://aws.southcoastscience.com/%s/%s/';
-[~,cURL_out]=system(sprintf(command, API_key, Topic_ID, Time_interval));
-json_decode=jsondecode(cURL_out);
-sample_length=length(json_decode.Items);
+url = 'https://aws.southcoastscience.com/topicMessages?topic=unep/ethiopia/loc/1/climate&startTime=%s&endTime=%s';
+start_time = '2018-12-12T07:03:59.712Z';
+end_time = '2018-12-13T15:10:59.712Z';
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+url = sprintf(url, start_time, end_time);
 
-%Pre-allocating variables:
-datetime=cell(items_num,1);
-NO2=zeros(items_num,1);
-H2S=zeros(items_num,1);
-CO=zeros(items_num,1);
-SO2=zeros(items_num,1);
-tmp=zeros(items_num,1);
-hmd=zeros(items_num,1);
-
-for n=1:sample_length
-    data.parameters.datetime{n,1}= json_decode.Items(n).payload.rec;
-    data.parameters.NO2(n,1)= json_decode.Items(n).payload.val.NO2.cnc;
-    data.parameters.H2S(n,1)= json_decode.Items(n).payload.val.H2S.cnc;
-    data.parameters.CO(n,1)= json_decode.Items(n).payload.val.CO.cnc;
-    data.parameters.SO2(n,1)= json_decode.Items(n).payload.val.SO2.cnc;
-    data.parameters.tmp(n,1)= json_decode.Items(n).payload.val.sht.tmp;
-    data.parameters.hmd(n,1)= json_decode.Items(n).payload.val.sht.hmd;
+i = 0;
+while (size(url) > 0)
+    i = i + 1;
+    command='curl -s "%s"';
+    [~,curl_out]=system(sprintf(command, url));
+    json_decode=jsondecode(curl_out);
+    
+    for i=i:length(json_decode.Items)
+        data.datetime{i,1}= json_decode.Items(i).payload.rec;
+        %data.NO2(i,1)= json_decode.Items(i).payload.val.NO2.cnc;
+        %data.H2S(i,1)= json_decode.Items(i).payload.val.H2S.cnc;
+        %data.CO(i,1)= json_decode.Items(i).payload.val.CO.cnc;
+        %data.SO2(i,1)= json_decode.Items(i).payload.val.SO2.cnc;
+        data.tmp(i,1)= json_decode.Items(i).payload.val.tmp;
+        data.hmd(i,1)= json_decode.Items(i).payload.val.hmd;
+    end
+    
+    if isfield(json_decode, 'next') == 1
+        i = i + 1;
+        url = json_decode.next;
+        command=sprintf(command, url);
+        [~,curl_out]=system(command);
+        json_decode=jsondecode(curl_out);
+        sample_length=length(json_decode.Items);
+        
+        for i = i:length(json_decode.Items)
+        data.datetime{i,1}= json_decode.Items(i).payload.rec;
+        %data.NO2(i,1)= json_decode.Items(i).payload.val.NO2.cnc;
+        %data.H2S(i,1)= json_decode.Items(i).payload.val.H2S.cnc;
+        %data.CO(i,1)= json_decode.Items(i).payload.val.CO.cnc;
+        %data.SO2(i,1)= json_decode.Items(i).payload.val.SO2.cnc;
+        data.tmp(i,1)= json_decode.Items(i).payload.val.tmp;
+        data.hmd(i,1)= json_decode.Items(i).payload.val.hmd;
+        end
+    else
+        url = '';
+    end
 end
 
 data.t = cellfun(@all_functions.datenum8601, cellstr(data.datetime));
 figure();
-plot(data.t, data.parameters.CO)
+plot(data.t, data.tmp, data.t, data.hmd)
 datetick('x', 'dd-mmm-yy HH:MM','keepticks','keeplimits');
-legend('CO');
-title(User.Topic_ID);
-xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'});
+legend('tmp', 'hmd')
+xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
 
 dcm_obj = datacursormode(gcf);
 set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); %Update "Data-Cursor" callback to display datetime x-values.
-
-
-

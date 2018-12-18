@@ -8,10 +8,11 @@ sampling_rate = 10;                                               % Specify sens
 localised_datetime_start = cell(1000, 1);
 dataout = cell(1000, 1);
 %-------------------------------------------------------------------------------------------------------------
-sensor_datetime = 'localised_datetime.py';
-[~, data.init.datetime] = system(sensor_datetime);
+local_datetime = 'localised_datetime.py';
+[~, data.init.datetime] = system(local_datetime);
 data.init.datetime = strtrim(data.init.datetime);
 pause(sampling_rate);
+
 hist_cmd = 'aws_topic_history.py %s -s %s | node.py -a';
 [~, data.init.dataout] = system(sprintf(hist_cmd, Topic_ID, data.init.datetime));
 data.init.jsondecode = jsondecode(data.init.dataout);
@@ -33,13 +34,13 @@ end
 [~, dataout{i,1}] = system(sprintf(hist_cmd, Topic_ID, localised_datetime_start{i,1}));
 
 data.jsondecode{i, 1} = jsondecode(dataout{i, 1});
-document_len = length(data.jsondecode{i,1});
+doc_len = length(data.jsondecode{i,1});
 
-if document_len > 1
-    for n = 2:document_len
+if doc_len > 1
+    for n = 2:doc_len
         data.jsondecode{i+n-1,1} = data.jsondecode{i,1}(n);
         
-        for j=i:(i+document_len-1)
+        for j=i:(i+doc_len-1)
             data.parameters.datetime{j, 1} = data.jsondecode{i, 1}(n-1).rec;
             data.parameters.NO2(j, 1) = data.jsondecode{i, 1}(n-1).val.NO2.cnc;
             data.parameters.CO(j, 1) = data.jsondecode{i, 1}(n-1).val.CO.cnc;
@@ -49,7 +50,7 @@ if document_len > 1
             data.parameters.tmp(j, 1) = data.jsondecode{i, 1}(n-1).val.sht.tmp;
             n=n+1;
         end
-        n=n-document_len;
+        n=n-doc_len;
         data.jsondecode{i,1}(n)=[];
     end
     i=i+n-1;
@@ -67,7 +68,7 @@ data.t = cellfun(@all_functions.datenum8601, cellstr(data.parameters.datetime));
 
 figure(1);
 plot(data.t, data.parameters.NO2, data.t, data.parameters.CO)
-datetick('x', 'dd-mmm-yy HH:MM','keepticks','keeplimits');
+datetick('x', 'dd-mmm-yy HH:MM:SS','keepticks','keeplimits')
 legend('NO2','CO')
 title(Topic_ID)
 xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
