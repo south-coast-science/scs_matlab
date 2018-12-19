@@ -272,43 +272,44 @@ classdef all_functions
             json_decode = jsondecode(aggr_out);
         end
         %-----------------------------------------------------------------------------------------
-        function json_decode = aggr_decode_live_init(Topic_ID, start_time, avg_interval)
+        function json_decode = aggr_decode_live_init(var)
             aggr_cmd = 'aws_topic_history.py %s -s %s| sample_aggregate.py -m -c %s val | node.py -a';
-            [~, aggr_out] = system(sprintf(aggr_cmd, Topic_ID, start_time, avg_interval));
+            [~, aggr_out] = system(sprintf(aggr_cmd, var.Topic_ID, var.init_time, var.avg_interval));
             json_decode = jsondecode(aggr_out);
         end
         %-----------------------------------------------------------------------------------------
-        function [json_decode, aggr_decode] = aggr_decode_live_merge(Topic_ID, start_time, start_time_aggr, avg_interval, avg_ratio, a, b, i)
+        function [json_decode, aggr_decode] = aggr_decode_live_merge(var)
             aggr_cmd = 'aws_topic_history.py %s -s %s | sample_aggregate.py -m -c %s val | node.py -a';
-            if a==0 && rem(i, avg_ratio)==0
-                [~, aggr_decode{b,1}] = system(sprintf(aggr_cmd, Topic_ID, start_time, avg_interval));
-            elseif a>1 && rem(i, avg_interval_sec/sampling_rate)==0
-                [~, aggr_decode{b,1}] = system(sprintf(aggr_cmd, Topic_ID, start_time_aggr, avg_interval));
+            aggr_init = rem(var.i, var.avg_ratio);
+            if var.a==1 && aggr_init==0
+                [~, aggr_decode{var.b,1}] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time{var.i,1}, var.avg_interval));
+            elseif var.a>1 && aggr_init==0
+                [~, aggr_decode{var.b,1}] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time_aggr{var.i,1}, var.avg_interval));
             else
-                [~, aggr_decode{b,1}] = system(sprintf(aggr_cmd, Topic_ID, end_time, avg_interval)); 
+                all_functions.aggr_decode_live(var);
             end
-            json_decode = jsondecode(aggr_decode{b,1});
-            aggr_decode = aggr_decode{b,1};
+            json_decode = jsondecode(aggr_decode{var.b,1});
+            aggr_decode = aggr_decode{var.b,1};
         end
         %-----------------------------------------------------------------------------------------
-        function [json_decode, aggr_decode] = aggr_decode_live(Topic_ID, end_time, avg_interval, b)
+        function [json_decode, aggr_decode] = aggr_decode_live(var)
             aggr_cmd = 'aws_topic_history.py %s -s %s | sample_aggregate.py -m -c %s val | node.py -a';
-            [~, aggr_decode{b,1}] = system(sprintf(aggr_cmd, Topic_ID, end_time, avg_interval));
-            json_decode = jsondecode(aggr_decode{b,1});
-            aggr_decode = aggr_decode{b,1};
+            [~, aggr_decode{var.b,1}] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time{var.i,1}, var.avg_interval));
+            json_decode = jsondecode(aggr_decode{var.b,1});
+            aggr_decode = aggr_decode{var.b,1};
         end
         %-----------------------------------------------------------------------------------------
-        function json_decode = decode_live(Topic_ID, start_time, i)
+        function json_decode = decode_live(var)
             live_cmd = 'aws_topic_history.py %s -s %s | node.py -a';
-            if iscell(start_time)==1 && i==0
-                i=1;
-                [~, live_out] = system(sprintf(live_cmd, Topic_ID, start_time{i,1}));
-                i=0;
-            elseif iscell(start_time)==1 && i~=0
-                start_time = start_time{i,1};
-                [~, live_out] = system(sprintf(live_cmd, Topic_ID, start_time));
+            if iscell(var.start_time)==1 && var.i==0
+                var.i=1;
+                [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time{var.i,1}));
+                var.i=0;
+            elseif iscell(var.start_time)==1 && var.i~=0
+                var.start_time = var.start_time{var.i,1};
+                [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time));
             else
-                [~, live_out] = system(sprintf(live_cmd, Topic_ID, start_time));
+                [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time));
             end
             json_decode = jsondecode(live_out);
         end
