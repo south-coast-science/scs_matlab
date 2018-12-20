@@ -266,9 +266,15 @@ classdef all_functions
             end
         end
         %-----------------------------------------------------------------------------------------
-        function json_decode = aggr_decode_hist(Topic_ID, start_time, end_time, avg_interval)
+        function start_time = time_init(var)
+            sensor_datetime = 'localised_datetime.py';
+            [~, init_out] = system(sensor_datetime);
+            start_time = strtrim(init_out);
+        end
+        %-----------------------------------------------------------------------------------------
+        function json_decode = aggr_decode_hist(var)
             aggr_cmd = 'aws_topic_history.py %s -s %s -e %s | sample_aggregate.py -m -c %s val | node.py -a';
-            [~, aggr_out] = system(sprintf(aggr_cmd, Topic_ID, start_time, end_time, avg_interval));
+            [~, aggr_out] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time, var.end_time, var.avg_interval));
             json_decode = jsondecode(aggr_out);
         end
         %-----------------------------------------------------------------------------------------
@@ -278,51 +284,59 @@ classdef all_functions
             json_decode = jsondecode(aggr_out);
         end
         %-----------------------------------------------------------------------------------------
-        function [json_decode, aggr_decode] = aggr_decode_live_merge(var)
+        function [aggr_decode, json_decode] = aggr_decode_live_merge(var)
             aggr_cmd = 'aws_topic_history.py %s -s %s | sample_aggregate.py -m -c %s val | node.py -a';
             aggr_init = rem(var.i, var.avg_ratio);
-            if var.a==1 && aggr_init==0
-                [~, aggr_decode{var.b,1}] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time{var.i,1}, var.avg_interval));
-            elseif var.a>1 && aggr_init==0
-                [~, aggr_decode{var.b,1}] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time_aggr{var.i,1}, var.avg_interval));
+            if var.a>1 && aggr_init==0
+                [~, aggr_decode{var.b}] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time_aggr{var.a}, var.avg_interval));
             else
-                all_functions.aggr_decode_live(var);
+                [~, aggr_decode{var.b}] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time{var.i}, var.avg_interval));
             end
-            json_decode = jsondecode(aggr_decode{var.b,1});
-            aggr_decode = aggr_decode{var.b,1};
+            json_decode = jsondecode(aggr_decode{var.b});
         end
         %-----------------------------------------------------------------------------------------
-        function [json_decode, aggr_decode] = aggr_decode_live(var)
-            aggr_cmd = 'aws_topic_history.py %s -s %s | sample_aggregate.py -m -c %s val | node.py -a';
-            [~, aggr_decode{var.b,1}] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time{var.i,1}, var.avg_interval));
-            json_decode = jsondecode(aggr_decode{var.b,1});
-            aggr_decode = aggr_decode{var.b,1};
-        end
-        %-----------------------------------------------------------------------------------------
+        
         function json_decode = decode_live(var)
             live_cmd = 'aws_topic_history.py %s -s %s | node.py -a';
             if iscell(var.start_time)==1 && var.i==0
                 var.i=1;
-                [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time{var.i,1}));
+                [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time{var.i}));
                 var.i=0;
             elseif iscell(var.start_time)==1 && var.i~=0
-                var.start_time = var.start_time{var.i,1};
-                [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time));
+                [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time{var.i}));
             else
                 [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time));
             end
             json_decode = jsondecode(live_out);
         end
         %-----------------------------------------------------------------------------------------
-        function json_decode = decode_hist(Topic_ID, start_time, end_time)
+        function json_decode = decode_hist(var)
             hist_cmd = 'aws_topic_history.py %s -s %s -e %s | node.py -a';
-            [~, hist_out] = system(sprintf(hist_cmd, Topic_ID, start_time, end_time));
+            [~, hist_out] = system(sprintf(hist_cmd, var.Topic_ID, var.start_time, var.end_time));
             json_decode = jsondecode(hist_out);
         end
         %-----------------------------------------------------------------------------------------
        
         
         %Plot-functions
+        %2D hist_data plot
+        function [dt_out, plt] = twoD_hist_plot(var, Y_data, data, aggr)
+            if exist('data', 'var')==1
+                type = data;
+            else
+                type = aggr;
+            end
+            dt_out = cellfun(@all_functions.datenum8601, cellstr(type.datetime));
+            X_data = dt_out;
+            figure();
+            plt = plot(X_data, Y_data);
+            datetick('x', 'dd-mmm-yy HH:MM', 'keepticks', 'keeplimits');
+            title(var.Topic_ID)
+            xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
+            dcm_obj = datacursormode(gcf);
+            set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor);
+        end
+        %-------------------------------------------------------------------------------------------
         %Function to display datetime values on "Data-Cursor" selection
         function output_txt = data_cursor(~,dcm_obj)
             pos = get(dcm_obj,'Position');

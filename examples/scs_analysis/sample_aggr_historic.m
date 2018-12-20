@@ -1,30 +1,21 @@
 clearvars;
 
-filename = mfilename('fullpath');
-[~, name, ~] = fileparts(filename);
-
 % User-defined variables:
-Topic_ID = 'unep/ethiopia/loc/1/particulates';
-start_time = '2018-12-12T12:00:00Z';
-end_time = '2018-12-13T12:00:00Z';
-avg_interval = '**:/5:00';
-%-------------------------------------------------------------------------------------------   
-json_decode = all_functions.aggr_decode_hist(Topic_ID, start_time, end_time, avg_interval);
+var.Topic_ID = 'unep/ethiopia/loc/1/particulates';
+var.start_time = '2018-12-12T12:00:00Z';
+var.end_time = '2018-12-13T12:00:00Z';
+var.avg_interval = '**:/5:00';
+%--------------------------------------------------------------------------
+json_decode = all_functions.aggr_decode_hist(var);
 sample_length = length(json_decode);
 
-for n = 1:sample_length
-    aggr.datetime{n ,1} = json_decode(n).rec;
-    aggr.PM2p5_min(n, 1) = json_decode(n).val.pm2p5.min;
-    aggr.PM2p5(n, 1) = json_decode(n).val.pm2p5.mid;
-    aggr.PM2p5_max(n, 1) = json_decode(n).val.pm2p5.max;
+for i = 1:sample_length
+    aggr.datetime{i,1} = json_decode(i).rec;
+    aggr.PM2p5_min(i,1) = json_decode(i).val.pm2p5.min;
+    aggr.PM2p5(i,1) = json_decode(i).val.pm2p5.mid;
+    aggr.PM2p5_max(i,1) = json_decode(i).val.pm2p5.max;
 end
 
-aggr.t = cellfun(@all_functions.datenum8601, cellstr(aggr.datetime));
-figure();
-plot(aggr.t, aggr.PM2p5_min, 'r:', aggr.t, aggr.PM2p5, 'r', aggr.t, aggr.PM2p5_max, 'r:');
-datetick('x', 'dd-mmm-yy HH:MM', 'keepticks', 'keeplimits');
+Y_data = [aggr.PM2p5_min, aggr.PM2p5, aggr.PM2p5_max];
+[aggr.t, plt] = all_functions.twoD_hist_plot(var, Y_data, aggr);
 legend('PM10 min', 'PM10 mid', 'PM10 max')
-title(Topic_ID)
-
-dcm_obj = datacursormode(gcf);
-set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor);
