@@ -2,7 +2,7 @@ clearvars;
 
 %User-defined variables:
 url = 'https://aws.southcoastscience.com/topicMessages?topic=unep/ethiopia/loc/1/climate&startTime=%s&endTime=%s';
-start_time = '2018-12-12T07:03:59.712Z';
+start_time = '2018-12-13T07:03:59.712Z';
 end_time = '2018-12-13T15:10:59.712Z';
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 url = sprintf(url, start_time, end_time);
