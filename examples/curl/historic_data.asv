@@ -23,23 +23,22 @@ while (size(var.url) > 0)
         data.hmd(i,1)= json_decode.Items(i).payload.val.hmd;
     end
     
-    while isfield(json_decode, 'next') == 1
-        i = i + 1;
-        i_init = i;
-        item_num = 0;
-        json_decode = all_functions.curl_decode_next(var, json_decode);
-        for i = i:(i_init+length(json_decode.Items)-1)
-            item_num = item_num + 1;
-            data.datetime{i,1}= json_decode.Items(item_num).payload.rec;
-            %data.NO2(i,1)= json_decode.Items(n).payload.val.NO2.cnc;
-            %data.H2S(i,1)= json_decode.Items(n).payload.val.H2S.cnc;
-            %data.CO(i,1)= json_decode.Items(n).payload.val.CO.cnc;
-            %data.SO2(i,1)= json_decode.Items(n).payload.val.SO2.cnc;
-            data.tmp(i,1)= json_decode.Items(item_num).payload.val.tmp;
-            data.hmd(i,1)= json_decode.Items(item_num).payload.val.hmd;
-        end
-    end
-    var.url = '';
+%     while isfield(json_decode, 'next') == 1
+%         i = i + 1;
+%         json_decode = all_functions.curl_decode_next(var, json_decode);
+%         n = 0;
+%         for i = i:(i+length(json_decode.Items))
+%             n = n + 1;
+%             data.datetime{i,1}= json_decode.Items(n).payload.rec;
+%             %data.NO2(i,1)= json_decode.Items(n).payload.val.NO2.cnc;
+%             %data.H2S(i,1)= json_decode.Items(n).payload.val.H2S.cnc;
+%             %data.CO(i,1)= json_decode.Items(n).payload.val.CO.cnc;
+%             %data.SO2(i,1)= json_decode.Items(n).payload.val.SO2.cnc;
+%             data.tmp(i,1)= json_decode.Items(n).payload.val.tmp;
+%             data.hmd(i,1)= json_decode.Items(n).payload.val.hmd;
+%         end
+%     end
+     var.url = '';
 end
 
 figure();

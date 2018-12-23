@@ -17,5 +17,5 @@ for i = 1:sample_length
 end
 
 Y_data = [aggr.PM2p5_min, aggr.PM2p5, aggr.PM2p5_max];
-[aggr.t, plt] = all_functions.twoD_hist_plot(var, Y_data, aggr);
+[aggr.t, chart] = all_functions.twoD_hist_plot(var, Y_data, aggr);
 legend('PM10 min', 'PM10 mid', 'PM10 max')

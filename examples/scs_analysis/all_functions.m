@@ -298,11 +298,7 @@ classdef all_functions
         
         function json_decode = decode_live(var)
             live_cmd = 'aws_topic_history.py %s -s %s | node.py -a';
-            if iscell(var.start_time)==1 && var.i==0
-                var.i=1;
-                [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time{var.i}));
-                var.i=0;
-            elseif iscell(var.start_time)==1 && var.i~=0
+            if iscell(var.start_time)==1 && var.i~=0
                 [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time{var.i}));
             else
                 [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time));
@@ -315,12 +311,14 @@ classdef all_functions
             [~, hist_out] = system(sprintf(hist_cmd, var.Topic_ID, var.start_time, var.end_time));
             json_decode = jsondecode(hist_out);
         end
+        
+        
         %-----------------------------------------------------------------------------------------
        
         
         %Plot-functions
         %2D hist_data plot
-        function [dt_out, plt] = twoD_hist_plot(var, Y_data, data, aggr)
+        function [dt_out, chart] = twoD_hist_plot(var, Y_data, data, aggr)
             if exist('data', 'var')==1
                 type = data;
             else
@@ -329,14 +327,13 @@ classdef all_functions
             dt_out = cellfun(@all_functions.datenum8601, cellstr(type.datetime));
             X_data = dt_out;
             figure();
-            plt = plot(X_data, Y_data);
+            chart = plot(X_data, Y_data);
             datetick('x', 'dd-mmm-yy HH:MM', 'keepticks', 'keeplimits');
             title(var.Topic_ID)
             xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
             dcm_obj = datacursormode(gcf);
             set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor);
         end
-        %-------------------------------------------------------------------------------------------
         %Function to display datetime values on "Data-Cursor" selection
         function output_txt = data_cursor(~,dcm_obj)
             pos = get(dcm_obj,'Position');

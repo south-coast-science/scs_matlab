@@ -16,5 +16,5 @@ for i = 1:sample_length
 end
 
 Y_data = [data.PM1, data.PM2_5, data.PM10];
-[data.t, aggr.t] = all_functions.twoD_hist_plot(var, Y_data, data);
+[data.t, chart] = all_functions.twoD_hist_plot(var, Y_data, data);
 legend('PM1', 'PM2.5', 'PM10')

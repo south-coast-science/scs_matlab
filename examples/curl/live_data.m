@@ -1,39 +1,31 @@
 clearvars;
 
 %User-defined variables:
-url = 'https://aws.southcoastscience.com/topicMessages?topic=unep/ethiopia/loc/1/climate&startTime=%s';
+var.Topic_ID = 'unep/ethiopia/loc/1/climate';
+var.url = 'https://aws.southcoastscience.com/topicMessages?topic=%s&startTime=%s';
 sampling_rate = 60;
-%-----------------------------------------------------------------------------------------------------------------
-i = 0;
+%---------------------------------------------------------------------------------
+%Initialization
+json_decode = cell(1000,1);
+var.i = 0;
 while (1)
-    i = i + 1;
+    var.i = var.i + 1;
     
-    if i==1
-        [~, start_time] = system('localised_datetime.py');
-        start_time = strtrim(start_time);
-    elseif i > 1
-        start_time = data.datetime{end,1};
+    if var.i==1
+        var.start_time = all_functions.time_init();
+    elseif var.i > 1
+        var.start_time = data.datetime{end};
     end
     pause(sampling_rate);
-    url = sprintf(url, start_time);
-    curl_cmd = 'curl -s "%s"';
-    [~,curl_out] = system(sprintf(curl_cmd, url));
-    json_decode = jsondecode(curl_out);
-    doc_length = length(json_decode.Items);
+    json_decode{var.i,1} = all_functions.curl_decode(var);
+    %Parameters to plot:   
+    data.datetime{var.i,1}= json_decode{var.i}.Items.payload.rec;
+    data.tmp(var.i,1)= json_decode{var.i}.Items.payload.val.tmp;
+    data.hmd(var.i,1)= json_decode{var.i}.Items.payload.val.hmd;
     
-    data.datetime{i,1}= json_decode.Items(i).payload.rec;
-    data.tmp(i,1)= json_decode.Items(i).payload.val.tmp;
-    data.hmd(i,1)= json_decode.Items(i).payload.val.hmd;
-    
-    data.t = cellfun(@all_functions.datenum8601, cellstr(data.datetime));
-    figure(1);
-    plot(data.t, data.tmp, data.t, data.hmd)
-    datetick('x', 'dd-mmm-yy HH:MM','keepticks','keeplimits');
+    Y_data = [data.tmp, data.hmd];
+    [data.t, chart] = all_functions.twoD_plot(var, Y_data, data);
     legend('tmp', 'hmd');
-    xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'});
-    
-    dcm_obj = datacursormode(gcf);
-    set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); %Update "Data-Cursor" callback to display datetime x-values.
 end
 
 

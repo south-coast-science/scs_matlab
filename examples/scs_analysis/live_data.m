@@ -2,26 +2,21 @@ clearvars;
 
 % User-defined variables:
 var.Topic_ID = 'south-coast-science-dev/production-test/loc/1/gases'; % Specify subscription topic.
-sampling_rate = 10;                                               % Specify sensor's sampling rate in seconds.
+sampling_rate = 10;                                                   % Specify sensor's sampling rate in seconds.
 %-------------------------------------------------------------------------------------------------------------
 % Pre-allocating variables
 var.start_time = cell(1000, 1);
 %-------------------------------------------------------------------------------------------------------------
-var.start_time{1} = all_functions.time_init(var);
-pause(sampling_rate);
 var.i = 0;
-data.init.jsondecode = all_functions.decode_live(var);
 while (1)
-    
 var.i = var.i + 1;
 
 if var.i==1
-    var.start_time{var.i} = data.init.jsondecode(end).rec;
-    pause(sampling_rate);
+    var.start_time{var.i} = all_functions.time_init(var);
 elseif var.i>1
     var.start_time{var.i} = data.jsondecode{end}.rec;
-    pause(sampling_rate);
 end
+pause(sampling_rate);
 data.jsondecode{var.i,1} = all_functions.decode_live(var);
 doc_len = length(data.jsondecode{var.i,1});
 

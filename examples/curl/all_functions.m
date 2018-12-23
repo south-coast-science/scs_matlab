@@ -244,8 +244,48 @@ classdef all_functions
             %
         end
         %----------------------------------------------------------------------END:dn8601Usr
-        
+        %Start-time Initialization
+        function start_time = time_init()
+            sensor_datetime = 'localised_datetime.py';
+            [~, init_out] = system(sensor_datetime);
+            start_time = strtrim(init_out);
+        end
+        %Decode-functions------------------------------------------------------
+        %cURL live decoder
+        function json_decode = curl_decode(var)
+            var.url = sprintf(var.url, var.Topic_ID, var.start_time);
+            curl_cmd = 'curl -s "%s"';
+            [~,curl_out] = system(sprintf(curl_cmd, var.url));
+            json_decode = jsondecode(curl_out);
+        end
+        function json_decode = curl_decode_next(var, json_decode)
+            var.url = json_decode.next;
+            curl_cmd = 'curl -s "%s"';
+            [~,curl_out] = system(sprintf(curl_cmd, var.url));
+            json_decode = jsondecode(curl_out);
+        end
         %Plot-functions--------------------------------------------------------
+        %2D hist_data plot
+        function [X_data, chart] = twoD_plot(var, Y_data, data, i)
+            if exist('i', 'var')==1
+                var.i = i;
+            end
+            if exist('data', 'var')==1
+                type = data;
+            else
+                type = aggr;
+            end
+            if var.i==1
+                figure();
+            end
+            X_data = cellfun(@all_functions.datenum8601, cellstr(type.datetime));
+            chart = plot(X_data, Y_data);
+            datetick('x', 'dd-mmm-yy HH:MM', 'keepticks', 'keeplimits');
+            xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
+            title(var.Topic_ID)
+            dcm_obj = datacursormode(gcf);
+            set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor);
+        end
         %Function to display datetime values on "Data-Cursor" selection
         function output_txt = data_cursor(~,dcm_obj)
             pos = get(dcm_obj,'Position');
