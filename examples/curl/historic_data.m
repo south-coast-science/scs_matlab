@@ -1,10 +1,10 @@
 clearvars;
-
+tic
 %User-defined variables:
-var.Topic_ID = 'unep/ethiopia/loc/1/climate';
+var.Topic_ID = 'unep/ethiopia/loc/1/particulates';
 var.url = 'https://aws.southcoastscience.com/topicMessages?topic=%s&startTime=%s&endTime=%s';
-var.start_time = '2018-12-12T07:03:59.712Z';
-var.end_time = '2018-12-22T20:10:59.712Z';
+var.start_time = '2018-12-12T12:00:00Z';
+var.end_time = '2018-12-13T12:00:00Z';
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 var.url = sprintf(var.url, var.Topic_ID, var.start_time, var.end_time);
 
@@ -19,8 +19,12 @@ while (size(var.url) > 0)
         %data.H2S(i,1)= json_decode.Items(i).payload.val.H2S.cnc;
         %data.CO(i,1)= json_decode.Items(i).payload.val.CO.cnc;
         %data.SO2(i,1)= json_decode.Items(i).payload.val.SO2.cnc;
-        data.tmp(i,1)= json_decode.Items(i).payload.val.tmp;
-        data.hmd(i,1)= json_decode.Items(i).payload.val.hmd;
+        %data.tmp(i,1)= json_decode.Items(i).payload.val.tmp;
+        %data.hmd(i,1)= json_decode.Items(i).payload.val.hmd;
+        data.pm1(i,1) = json_decode.Items(i).payload.val.pm1;
+        data.pm2_5(i,1) = json_decode.Items(i).payload.val.pm2p5;
+        data.pm10(i,1) = json_decode.Items(i).payload.val.pm10;
+        
     end
     
     while isfield(json_decode, 'next') == 1
@@ -35,14 +39,18 @@ while (size(var.url) > 0)
             %data.H2S(i,1)= json_decode.Items(n).payload.val.H2S.cnc;
             %data.CO(i,1)= json_decode.Items(n).payload.val.CO.cnc;
             %data.SO2(i,1)= json_decode.Items(n).payload.val.SO2.cnc;
-            data.tmp(i,1)= json_decode.Items(item_num).payload.val.tmp;
-            data.hmd(i,1)= json_decode.Items(item_num).payload.val.hmd;
+            %data.tmp(i,1)= json_decode.Items(item_num).payload.val.tmp;
+            %data.hmd(i,1)= json_decode.Items(item_num).payload.val.hmd;
+            data.pm1(i,1) = json_decode.Items(item_num).payload.val.pm1;
+            data.pm2_5(i,1) = json_decode.Items(item_num).payload.val.pm2p5;
+            data.pm10(i,1) = json_decode.Items(item_num).payload.val.pm10;
         end
     end
     var.url = '';
 end
 
 figure();
-Y_data = [data.tmp, data.hmd];
+Y_data = [data.pm1, data.pm2_5, data.pm10];
 [data.t, chart] = all_functions.twoD_plot(var, Y_data, data, i);
-legend('tmp', 'hmd')
+legend('pm1', 'pm2.5', 'pm10')
+toc

@@ -333,6 +333,7 @@ classdef all_functions
             xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
             dcm_obj = datacursormode(gcf);
             set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor);
+            grid minor
         end
         %Function to display datetime values on "Data-Cursor" selection
         function output_txt = data_cursor(~,dcm_obj)

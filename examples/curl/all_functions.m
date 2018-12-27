@@ -285,6 +285,7 @@ classdef all_functions
             title(var.Topic_ID)
             dcm_obj = datacursormode(gcf);
             set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor);
+            grid minor
         end
         %Function to display datetime values on "Data-Cursor" selection
         function output_txt = data_cursor(~,dcm_obj)
