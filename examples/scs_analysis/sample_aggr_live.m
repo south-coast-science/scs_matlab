@@ -21,14 +21,9 @@ while(1)
     elseif var.i>0
         var.i = var.i + x;
         var.b = var.b + 1;
-        var.start_time = aggr.decode{end}.rec;
+        var.start_time = aggr.decode{end,1}(end).rec;
     end
-%     % "Got new val?" loop
-%     check_rec = all_functions.time_init(var);
-%     if check_rec == aggr.decode{var.b-1,1}
-%         pause(avg_interval_sec/2)
-%     end
-    
+
     aggr.decode{var.b,1} = all_functions.decode_fcn(var);
     
     % Define parameters extracted from aggregated data:

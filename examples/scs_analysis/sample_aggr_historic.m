@@ -1,15 +1,19 @@
 clearvars;
 
+filename = mfilename('fullpath');
+[~, var.filename, ~] = fileparts(filename);
+
 % User-defined variables:
 var.Topic_ID = 'unep/ethiopia/loc/1/particulates';
 var.start_time = '2018-12-12T12:00:00Z';
-var.end_time = '2018-12-13T12:00:00Z';
+var.end_time = '2018-12-12T13:00:00Z';
 var.avg_interval = '**:/5:00';
 %--------------------------------------------------------------------------
-json_decode = all_functions.aggr_decode_hist(var);
-sample_length = length(json_decode);
+json_decode = all_functions.decode_fcn(var);
+var.sample_length = length(json_decode);
 
-for i = 1:sample_length
+for i = 1:var.sample_length
+    var.i = i;
     aggr.datetime{i,1} = json_decode(i).rec;
     aggr.PM2p5_min(i,1) = json_decode(i).val.pm2p5.min;
     aggr.PM2p5(i,1) = json_decode(i).val.pm2p5.mid;
