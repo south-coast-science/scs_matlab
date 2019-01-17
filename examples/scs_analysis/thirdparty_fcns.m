@@ -1,8 +1,8 @@
-classdef all_functions
-    methods(Static)
-        function [DtN,Spl,TkC] = datenum8601(Str,Tok)
+classdef thirdparty_fcns
+    methods (Static)
+function [DtN,Spl,TkC] = datenum8601(Str,Tok)
             % Convert an ISO 8601 formatted Date String (timestamp) to a Serial Date Number.
-            %
+            
             % (c) 2015 Stephen Cobeldick
             %
             % ### Function ###
@@ -147,7 +147,7 @@ classdef all_functions
                 TkL = numel(MtE);
                 Ntn = find(strncmp(MtE,{'ymdHMS','ynHMS','YWDHMS'},TkL),1,'first');
                 assert(~isempty(Ntn),'Second input <Tok> is not supported: ''%s''',Tok)
-                MtE = all_functions.dn8601Usr(TkU,TkL,Ntn);
+                MtE = thirdparty_fcns.dn8601Usr(TkU,TkL,Ntn);
             end
             %
             assert(ischar(Str)&&size(Str,1)<2,'First input <Str> must be a string.')
@@ -155,7 +155,7 @@ classdef all_functions
             % Extract timestamp tokens, return split strings:
             [TkC,Spl] = regexp(Str,MtE,'tokens','split');
             %
-            [DtN,TkC] = cellfun(@all_functions.dn8601Main,TkC);
+            [DtN,TkC] = cellfun(@thirdparty_fcns.dn8601Main,TkC);
             %
         end
         %----------------------------------------------------------------------END:datenum8601
@@ -244,140 +244,5 @@ classdef all_functions
             %
         end
         %----------------------------------------------------------------------END:dn8601Usr
-        
-        % Get last recorded datetime
-        function start_time = time_init(var)
-            last_rec = 'aws_byline.py -t %s';
-            [~, init_out] = system(sprintf(last_rec, var.Topic_ID));
-            init_out = jsondecode(init_out);
-            start_time = init_out.rec;
-        end
-        
-        % Historic/Aggregated data importer/decoder
-        function json_decode = decode_fcn(var)
-            var_names = evalin('caller','fieldnames(var)');
-            exist_end = any(strcmp(var_names,'end_time'));
-            if contains(var.filename, 'sample_aggr')==1 && exist_end==1
-                aggr_cmd = 'aws_topic_history.py %s -s %s -e %s | sample_aggregate.py -m -c %s val | node.py -a';
-                [~, aggr_hist_out] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time, var.end_time, var.avg_interval));
-                json_decode = jsondecode(aggr_hist_out);
-            elseif contains(var.filename, 'sample_aggr')==1 && exist_end==0
-                aggr_cmd = 'aws_topic_history.py %s -s %s| sample_aggregate.py -m -c %s val | node.py -a';
-                [~, aggr_live_out] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time, var.avg_interval));
-                json_decode = jsondecode(aggr_live_out);
-            elseif exist_end==0
-                live_cmd = 'aws_topic_history.py %s -s %s | node.py -a';
-                [~, live_out] = system(sprintf(live_cmd, var.Topic_ID, var.start_time));
-                json_decode = jsondecode(live_out);
-            else
-                hist_cmd = 'aws_topic_history.py %s -s %s -e %s | node.py -a';
-                [~, hist_out] = system(sprintf(hist_cmd, var.Topic_ID, var.start_time, var.end_time));
-                json_decode = jsondecode(hist_out);
-            end
-        end
-
-        % Sample aggregate live merged importer/decoders
-        function json_decode = aggr_decode_live_merge(var)
-            aggr_cmd = 'aws_topic_history.py %s -s %s | sample_aggregate.py -m -c %s val | node.py -a';
-            aggr_init = rem(var.i, var.avg_ratio);
-            if var.a>1 && aggr_init==0
-                [~, aggr_decode{var.b}] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time_aggr{var.a}, var.avg_interval));
-            else
-                [~, aggr_decode{var.b}] = system(sprintf(aggr_cmd, var.Topic_ID, var.start_time{1}, var.avg_interval));
-            end
-            json_decode = jsondecode(aggr_decode{var.b});
-        end
-        %-----------------------------------------------------------------------------------------
-       
-        
-        % Plot-functions
-        % 2D hist_data plot
-        function [X_data, chart] = twoD_hist_plot(var, Y_data, data, aggr)
-            if exist('data', 'var')==1
-                type = data;
-            elseif exist('aggr', 'var')==1
-                type = aggr;
-            end
-            X_data = cellfun(@all_functions.datenum8601, cellstr(type.datetime));
-            if var.i==1 || var.i==var.sample_length
-                figure('Name', 'Historic Data');
-            end
-            chart = plot(X_data, Y_data);
-            datetick('x', 'dd-mmm-yy HH:MM', 'keepticks', 'keeplimits');
-            title(var.Topic_ID)
-            xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
-            dcm_obj = datacursormode(gcf);
-            set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor);
-            grid minor
-            
-            dcm_obj = datacursormode(gcf);
-            set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); % Updates "Data-Cursor" callback to display datetime x-values.
-        end
-        
-        % 2D live_data plot
-        function [X_data, chart] = twoD_live_plot(var, Y_data, data)
-            X_data = cellfun(@all_functions.datenum8601, cellstr(data.datetime));
-            if var.i==1
-                figure('Name', 'Live Data');
-            end
-            chart = plot(X_data, Y_data);
-            datetick('x', 'dd-mmm-yy HH:MM', 'keepticks', 'keeplimits');
-            title(var.Topic_ID)
-            xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
-            dcm_obj = datacursormode(gcf);
-            set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor);
-            grid minor
-            
-            dcm_obj = datacursormode(gcf);
-            set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); % Updates "Data-Cursor" callback to display datetime x-values.
-        end
-        
-        % 2D live_aggr_data plot
-        function [X_data, aggr_chart] = twoD_live_aggr_plot(var, Y_data, aggr)
-            X_data = cellfun(@all_functions.datenum8601, cellstr(aggr.datetime));
-            if var.a==1
-                figure('Name', 'Live Aggregated Data');
-            end
-            aggr_chart = plot(X_data, Y_data);
-            datetick('x', 'dd-mmm-yy HH:MM', 'keepticks', 'keeplimits');
-            title(var.Topic_ID)
-            xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
-            dcm_obj = datacursormode(gcf);
-            set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor);
-            grid minor
-            
-            dcm_obj = datacursormode(gcf);
-            set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor); % Updates "Data-Cursor" callback to display datetime x-values.
-        end
-        
-        % Function to display datetime values on "Data-Cursor" selection
-        function output_txt = data_cursor(~,dcm_obj)
-            pos = get(dcm_obj,'Position');
-            output_txt = {['X: ', datestr(pos(1))],['Y: ',num2str(pos(2),4)]};
-            if length(pos) > 2
-                output_txt{end+1} = ['Z: ',num2str(pos(3),4)];
-            end
-        end
-        %---------------------------------------------------------------------
-        
-        
-        % CSV writer
-        % To write data to a csv file ensure that the data is in a "data"
-        % or "aggr" structure and specify "filename".
-        function csv_write(filename, data, aggr)
-            if exist('data', 'var')==1
-                type = data;
-            else
-                type = aggr;
-            end
-            fnames = fieldnames(type);
-            T = table;
-            for i = 1:length(fnames)
-                x_T = table(num2cell(getfield(type, fnames{i})));
-                x_T.Properties.VariableNames = {fnames{i}};
-                T = [T, x_T];
-            end
-            writetable(T, filename)
-        end
     end
 end
