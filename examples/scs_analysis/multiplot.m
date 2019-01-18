@@ -1,6 +1,6 @@
-function [fig, chart] = multiplot(Y_data, type, var, fig)
+function [fig, chart] = multiplot(Y_data, type, var, jsondecode, fig)
 gases = {'CO';'NO2';'H2S';'SO2'};
-particulates = {'PM1'; 'PM2p5'; 'PM10'};
+particulates = {'PM1';'PM2p5';'PM10'};
 
 gases_true = any(ismember(fieldnames(Y_data), gases));
 particulates_true = any(ismember(fieldnames(Y_data), particulates));
@@ -55,11 +55,11 @@ if type_count==1
 elseif type_count==2
     if isfield(Y_data, 'NO2') && isfield(Y_data, 'tmp')
         chart.ax1 = subplot(2, 1, 1);
-        fig = NO2plot(Y_data, X_data, data, var, fig);
+        fig = NO2plot(Y_data, X_data, type, var, fig);
         utilities.plotproperties(var)
         
         chart.ax2 = subplot(2,1,2);
-        fig = tmpplot(Y_data, X_data, data, var, fig);
+        fig = tmpplot(Y_data, X_data, type, var, fig);
         utilities.subplotproperties(var)
     end
     
@@ -386,8 +386,7 @@ elseif type_count==3
         utilities.subplotproperties(var)
     end
 end
+sensor_tag = 'device_tag:%s';
+sensor_tag = sprintf(sensor_tag, jsondecode(1).tag);
+uicontrol(fig, 'Style', 'text', 'String', sensor_tag, 'Position', [20, 20, 120, 15]);
 end
-
-
-
-

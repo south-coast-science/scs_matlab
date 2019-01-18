@@ -244,14 +244,14 @@ classdef all_functions
             %
         end
         %----------------------------------------------------------------------END:dn8601Usr
-        %Start-time Initialization
+        % Start-time Initialization
         function start_time = time_init()
             sensor_datetime = 'localised_datetime.py';
             [~, init_out] = system(sensor_datetime);
             start_time = strtrim(init_out);
         end
-        %Decode-functions------------------------------------------------------
-        %cURL live decoder
+        % Decode-functions------------------------------------------------------
+        % cURL live decoder
         function json_decode = curl_decode(var)
             var.url = sprintf(var.url, var.Topic_ID, var.start_time);
             curl_cmd = 'curl -s "%s"';
@@ -264,8 +264,8 @@ classdef all_functions
             [~,curl_out] = system(sprintf(curl_cmd, var.url));
             json_decode = jsondecode(curl_out);
         end
-        %Plot-functions--------------------------------------------------------
-        %2D hist_data plot
+        % Plot-functions--------------------------------------------------------
+        % 2D hist_data plot
         function [X_data, chart] = twoD_plot(var, Y_data, data, i)
             if exist('i', 'var')==1
                 var.i = i;
@@ -287,13 +287,27 @@ classdef all_functions
             set(dcm_obj, 'UpdateFcn',@all_functions.data_cursor);
             grid minor
         end
-        %Function to display datetime values on "Data-Cursor" selection
+        % Function to display datetime values on "Data-Cursor" selection
         function output_txt = data_cursor(~,dcm_obj)
             pos = get(dcm_obj,'Position');
             output_txt = {['X: ', datestr(pos(1))],['Y: ',num2str(pos(2),4)]};
             if length(pos) > 2
                 output_txt{end+1} = ['Z: ',num2str(pos(3),4)];
             end
+        end
+        %---------------------------------------------------------------------
+        % CSV writer
+        % To write data to a csv file ensure that the data is in a "data"
+        % structure and specify "filename".
+        function csv_write(filename, data)
+            fnames = fieldnames(data);
+            T = table;
+            for i = 1:length(fnames)
+                x_T = table(num2cell(getfield(data, fnames{i})));
+                x_T.Properties.VariableNames = {fnames{i}};
+                T = [T, x_T];
+            end
+            writetable(T, filename)
         end
     end
 end

@@ -1,9 +1,9 @@
 clearvars;
 
 %User-defined variables:
-var.Topic_ID = 'unep/ethiopia/loc/1/particulates';
-var.url = 'https://aws.southcoastscience.com/topicMessages?topic=%s&startTime=%s';
-sampling_rate = 10;
+var.Topic_ID = 'unep/ethiopia/loc/1/particulates';                                  % Specify subscription topic.
+var.url = 'https://aws.southcoastscience.com/topicMessages?topic=%s&startTime=%s';  % Specify subscription URL.
+sampling_rate = 10;                                                                 % Specify sensor's sampling rate in seconds.
 %---------------------------------------------------------------------------------
 %Initialization
 json_decode = cell(1000,1);

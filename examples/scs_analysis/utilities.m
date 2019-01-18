@@ -166,7 +166,7 @@ classdef utilities
                 live_fig = ancestor(plt, 'figure');
                 hold on
             end
-            utilities.plotproperties(var, Y_data)
+            utilities.plotproperties(var)
             hold off
         end
         
@@ -274,7 +274,7 @@ classdef utilities
                 aggr_fig = ancestor(plt, 'figure');
                 hold on 
             end
-            utilities.plotproperties(var, Y_data_aggr)
+            utilities.plotproperties(var)
             hold off
         end
         %---------------------------------------------------------------------
@@ -282,10 +282,12 @@ classdef utilities
             if strcmp(var.filename, 'live_data')
                 datetick('x', 'dd-mmm-yy HH:MM:SS', 'keeplimits');
                 if var.i==1
+                    grid on
                     grid minor
                 end
             else
                 datetick('x', 'dd-mmm-yy HH:MM', 'keepticks', 'keeplimits');
+                grid on
                 grid minor
             end
             title(var.Topic_ID)
@@ -298,10 +300,12 @@ classdef utilities
             if strcmp(var.filename, 'live_data')
                 datetick('x', 'dd-mmm-yy HH:MM:SS', 'keeplimits');
                 if var.i==1
+                    grid on
                     grid minor
                 end
             else
                 datetick('x', 'dd-mmm-yy HH:MM', 'keepticks', 'keeplimits');
+                grid on
                 grid minor
             end
             xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
