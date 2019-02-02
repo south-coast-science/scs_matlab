@@ -22,7 +22,7 @@ while (1)
     end
     jsondecode{var.j,1} = utilities.decode_fcn(var);
    
-    for n = 1:length(data.jsondecode{end})
+    for n = 1:length(jsondecode{end})
         type.data.datetime{var.i+n-1,1} = jsondecode{var.j,1}(n).rec;
         type.data.NO2(var.i+n-1,1) = jsondecode{var.j,1}(n).val.NO2.cnc;
         type.data.CO(var.i+n-1,1) = jsondecode{var.j,1}(n).val.CO.cnc;

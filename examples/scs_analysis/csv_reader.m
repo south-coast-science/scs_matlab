@@ -12,6 +12,9 @@ type.aggr.datetime{n,1} = jsondecode(n).datetime;
 type.aggr.NO2(n,1) = jsondecode(n).NO2;
 type.aggr.NO2_min(n,1) = jsondecode(n).NO2_min;
 type.aggr.NO2_max(n,1) = jsondecode(n).NO2_max;
+type.aggr.SO2(n,1) = jsondecode(n).SO2;
+type.aggr.SO2_min(n,1) = jsondecode(n).SO2_min;
+type.aggr.SO2_max(n,1) = jsondecode(n).SO2_max;
 type.aggr.PM10(n,1) = jsondecode(n).PM10;
 type.aggr.PM10_min(n,1) = jsondecode(n).PM10_min;
 type.aggr.PM10_max(n,1) = jsondecode(n).PM10_max;
@@ -21,5 +24,5 @@ type.aggr.tmp_max(n,1) = jsondecode(n).tmp_max;
 end
 
 fig = figure();
-Y_data.NO2 = []; Y_data.PM10 = []; Y_data.tmp = []; % Specify plotted parameters.
-multiplot(Y_data, type, var, jsondecode, fig); 
+Y_data.PM10 = []; Y_data.NO2 =[]; Y_data.tmp=[]; Y_data.SO2=[]; % Specify plotted parameters.
+multiplotv2(Y_data, type, var, jsondecode, fig)
