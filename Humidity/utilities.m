@@ -420,8 +420,9 @@ classdef utilities
         
         
         % CSV writer
-        % To write data to a csv file ensure that the data is in a "data"
-        % or "aggr" structure and specify "filename".
+        % To write data to a csv file ensure that the data are all in the
+        % same structure and specify "filename".
+
         function csv_write(filename, data)
             fnames = fieldnames(data);
             T = table;
