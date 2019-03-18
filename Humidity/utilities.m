@@ -210,6 +210,7 @@ classdef utilities
             dcm_obj = datacursormode(gcf);
             dcm_obj.UpdateFcn = utilities.data_cursor; % Updates "Data-Cursor" callback to display datetime x-values.
         end
+        
         % 3D bar chart
         function ddd_handle = ddd_bar_plot(type, var, Z_data)
             x_tick = 12;
@@ -438,8 +439,8 @@ classdef utilities
         % Specify "pdf_name" before calling function.
         function figuretopdf(pdf_name)
             h=gcf;
-            set(h,'PaperOrientation','landscape');
-            set(h,'PaperPosition', [1 1 28 19]);
+            h.PaperOrientation = 'landscape';
+            h.PaperPosition = [1 1 28 19];
             print(gcf, '-dpdf', pdf_name);
         end
     end

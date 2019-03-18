@@ -77,7 +77,7 @@ classdef utilities
             
             if type_count==1
                 for n=1:length(fieldnames(Y_data))
-                    fig = pol_plot(X_data,type,hist,fig,pollutants,idx(n,:));
+                    fig = utilities.pol_plot(X_data,type,hist,fig,pollutants,idx(n,:));
                     hold on
                     utilities.plotproperties(var)
                 end
@@ -85,14 +85,14 @@ classdef utilities
             elseif type_count==2
                 for n=1:num_pol(idxx(1))
                     chart.ax1 = subplot(2, 1, 1);
-                    fig = pol_plot(X_data,type,hist,fig,pollutants,idx(n,:));
+                    fig = utilities.pol_plot(X_data,type,hist,fig,pollutants,idx(n,:));
                     hold(chart.ax1, 'on')
                     utilities.plotproperties(var)
                 end
                 hold(chart.ax1, 'off')
                 for m=n+1:n+num_pol(idxx(2))
                     chart.ax2 = subplot(2,1,2);
-                    fig = pol_plot(X_data,type,hist,fig,pollutants,idx(m,:));
+                    fig = utilities.pol_plot(X_data,type,hist,fig,pollutants,idx(m,:));
                     hold(chart.ax2, 'on')
                     utilities.subplotproperties(var)
                 end
@@ -100,21 +100,21 @@ classdef utilities
             elseif type_count==3
                 for n=1:num_pol(idxx(1))
                     chart.ax1 = subplot(2,2,[1,2]);
-                    fig = pol_plot(X_data,type,hist,fig,pollutants,idx(n,:));
+                    fig = utilities.pol_plot(X_data,type,hist,fig,pollutants,idx(n,:));
                     hold(chart.ax1, 'on')
                     utilities.plotproperties(var)
                 end
                 hold(chart.ax1, 'off')
                 for m=n+1:n+num_pol(idxx(2))
                     chart.ax2 = subplot(2,2,3);
-                    fig = pol_plot(X_data,type,hist,fig,pollutants,idx(m,:));
+                    fig = utilities.pol_plot(X_data,type,hist,fig,pollutants,idx(m,:));
                     hold(chart.ax2, 'on')
                     utilities.subplotproperties(var)
                 end
                 hold(chart.ax2, 'off')
                 for k=m+1:m+num_pol(idxx(3))
                     chart.ax3 = subplot(2,2,4);
-                    fig = pol_plot(X_data,type,hist,fig,pollutants,idx(k,:));
+                    fig = utilities.pol_plot(X_data,type,hist,fig,pollutants,idx(k,:));
                     hold(chart.ax3, 'on')
                     utilities.subplotproperties(var)
                 end
@@ -156,9 +156,9 @@ classdef utilities
                 figure(fig)
                 plot(X_data, type.aggr.(pollutants(idx,:)), 'Color', properties.Color(idx,:), 'LineWidth', 1);
                 hold on
-                plot(X_data, type.aggr.(strcat((pollutants(idx,:)),'_min')), 'Color', properties.Color(idx,:), 'LineWidth', 1, 'LineStyle', ':');
+                plot(X_data, type.aggr.(pollutants(idx,:)),'_min', 'Color', properties.Color(idx,:), 'LineWidth', 1, 'LineStyle', ':');
                 hold on
-                plt = plot(X_data, type.aggr.(strcat((pollutants(idx,:)),'_max')), 'Color', properties.Color(idx,:), 'LineWidth', 1, 'LineStyle', ':');
+                plt = plot(X_data, type.aggr.(pollutants(idx,:)),'_max', 'Color', properties.Color(idx,:), 'LineWidth', 1, 'LineStyle', ':');
                 fig = ancestor(plt, 'figure');
                 legend(gca, properties.legnd(idx,:))
                 hold on
@@ -208,7 +208,7 @@ classdef utilities
             title(var.Topic_ID, 'Fontweight', 'bold')
             
             dcm_obj = datacursormode(gcf);
-            set(dcm_obj, 'UpdateFcn',@utilities.data_cursor); % Updates "Data-Cursor" callback to display datetime x-values.
+            dcm_obj.UpdateFcn = utilities.data_cursor; % Updates "Data-Cursor" callback to display datetime x-values.
         end
         % 3D bar chart
         function ddd_handle = ddd_bar_plot(type, var, Z_data)
@@ -291,7 +291,7 @@ classdef utilities
             title(var.Topic_ID)
             xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
             dcm_obj = datacursormode(gcf);
-            set(dcm_obj, 'UpdateFcn',@utilities.data_cursor); % Updates "Data-Cursor" callback to display datetime x-values.
+            dcm_obj.UpdateFcn = utilities.data_cursor; % Updates "Data-Cursor" callback to display datetime x-values.
         end
         
         function subplotproperties(var)
@@ -308,7 +308,7 @@ classdef utilities
             end
             xlabel({'Date-Time'; '(dd-mmm-yy HH:MM)'})
             dcm_obj = datacursormode(gcf);
-            set(dcm_obj, 'UpdateFcn',@utilities.data_cursor); % Updates "Data-Cursor" callback to display datetime x-values.
+            dcm_obj.UpdateFcn = utilities.data_cursor; % Updates "Data-Cursor" callback to display datetime x-values.
         end
         
         % Colormap for 3D plots
