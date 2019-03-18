@@ -1,3 +1,31 @@
+% REGRESSION MODEL & PLOTTER
+%
+% Created 11 February 2019
+%
+% @author: Milton Logothetis (milton.logothetis@southcoastscience.com)
+%
+% DESCRIPTION 
+% This script can be used to extract regression data from a csv file and
+% create either a colored (init.col==1) or uncolored scatter plot (init.col==0).
+% The data can be plotted as a single model or collated with respect to an external 
+% parameter (usually absolute humidity). The scatter points can be colored 
+% based on the external parameter (init.col_aH==1) or w.r.t the datetime values
+% (init.col_aH==0).
+%
+% Example
+% 1. Specify initialization parameters and run "Initialization" section script.
+% 2. In "Single Linear Regression (color based on rec)" script specify
+%    init.col==1.
+% 3. Uncomment "utilities.figuretopdf(pdf_name)" to save chart as pdf.
+% 4. Run section script and output regression model chart for the whole
+%    dataset, colored w.r.t the datetime column.
+%
+% NOTES: 
+% - Initialize script before running any section.
+% - Wherever aH (absolute humidity) is used as a coloring
+%   or collation reference it can be replaced by any other variable from the
+%   imported dataset(e.g. relative humidity, temperature etc).
+
 %% Initialization
 clearvars;
 
@@ -12,7 +40,7 @@ aH_col = thirdparty_fcns.xlscol('U');
 
 ref = 'ref (ppb)';
 rep = '431 (ppb)';
-init.cbhr_label = 'Relative Humidity (%)'; %'Absolute Humidity (\mug/m^3)'
+init.cbhr_label = 'Relative Humidity (%)'; % East colorbar label. ('Absolute Humidity (\mug/m^3)')
 
 [data, rgb, joined_filename] = humidity_fcns.reg_read_init(joined_filename, doc_len, N_cols, rep_col, ref_col, aH_col);
 
@@ -91,7 +119,7 @@ model.linear_reg = cell(length(rownames),1);
 
 for n=1:height(aH_ints)-1
     
-    fig{n,1} =  humidity_fcns.collated_reg_aH_rec(model, data, rownames, aH_ints, init, n);
+    fig{n,1} =  humidity_fcns.collated_reg_aH_rec(model, data, aH_ints, init, n);
     if isempty(fig{n,1})
         continue
     end

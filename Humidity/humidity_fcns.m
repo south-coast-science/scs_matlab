@@ -1,8 +1,32 @@
 classdef humidity_fcns
+    % Created on 18 January 2019
+    %
+    % @author: Milton Logothetis (milton.logothetis@southcoastscience.com)
+    %
+    % DESCRIPTION
+    % Relevant functions for calculating and modelling external parameters
+    % affecting sensor readings.
+    %
+    % SYNOPSIS
+    % - [aH,RH] = abs_humidity(type)
+    % - P = P_atm(T,h)
+    % - p0 = P_sea(P,h,T)
+    % - R_squared = R_squared(data1, data2)
+    % - [data, rgb, joined_filename] = reg_read_init(joined_filename, doc_len, N_cols, rep_col, ref_col, aH_col)
+    % - [data, aH, cmap] = aH_color(data, rgb, int_step)
+    % - scatter_reg_col(model, clr_data, data, init)
+    % - fig = collated_reg_aH_rec(model, data, rownames, aH_ints, init, n)
+    % - scatter3sph(x, y, z, sf, rgb)
+    % - scatter3circ(x, y, z, sz, rgb)
+    %
+    % ADDITIONAL NOTES: Wherever aH (absolute humidity) is used as a coloring
+    % or collation reference it can be replaced by any other variable from the
+    % imported dataset(e.g. relative humidity, temperature etc).
+    
     methods(Static)
         
         % Absolute humidity calculator
-        function [aH,RH] = abs_humidity(type)
+        function [aH,RH] = abs_humidity(data)
             
             Rw = 461.52; % Specific gas constant for water vapour (J/kg*K)
             Pc = 22.064*10^6; % Critical Pressure (Pa)
@@ -14,10 +38,10 @@ classdef humidity_fcns
             a5 = -15.9618719;
             a6 = 1.80122502;
             
-            for n=1:length(type.data.tmp)
+            for n=1:length(data.tmp)
                 
-                T(n,1) = type.data.tmp(n,1); % Ambient Temperature(degrees C)
-                RH(n,1) = type.data.hmd(n,1); % Relative Humidity (%)
+                T(n,1) = data.tmp(n,1); % Ambient Temperature(degrees C)
+                RH(n,1) = data.hmd(n,1); % Relative Humidity (%)
                 th(n,1) = 1-((T(n)+273.15)/Tc);
                 
                 Pws(n,1) = Pc*exp((Tc/(T(n)+273.15))*(a1*th(n)+a2*th(n)^1.5+a3*th(n)^3+a4*th(n)^3.5+a5*th(n)^4+a6*th(n)^7.5)); % (kPa)
@@ -25,8 +49,6 @@ classdef humidity_fcns
                 aH(n,1) = Pw(n)*1000/(Rw*(T(n)+273.15)); % (g/m^3)
                 
             end
-            % W = 621.97*Pw*(P-Pw); % Mixing Ratio (g/kg)
-            % h = (T+273.15)*(1.01+0.00189*W)+2.5*W; % enthalpy (kJ/kg)
         end
         
         % Ambient pressure depending on height calculator (below h=11km)
@@ -55,22 +77,6 @@ classdef humidity_fcns
             p0 = P/((1-(L*h/(T+L*h+273.15)))^A); % Sea-level pressure (Pa)
         end
         
-        % Create csv spreadsheet
-        function create_spreadsheet(type, filename)
-            [aH,~] = humidity_fcns.abs_humidity(type);
-            data.datetime = type.data.datetime;
-            data.NO2 = type.data.NO2;
-            data.NO2_weC = type.data.NO2_wec;
-            data.NO = type.data.NO;
-            data.NO_weC = type.data.NO_wec;
-            data.CO = type.data.CO;
-            data.CO_weC = type.data.CO_wec;
-            data.tmp = type.data.tmp;
-            data.hmd = type.data.hmd;
-            data.aH = aH;
-            utilities.csv_write(filename,data);
-        end
-        
         % Linear correlation
         function R_squared = R_squared(data1, data2)
             y_bar = mean(data2); % mean of observed data
@@ -80,68 +86,41 @@ classdef humidity_fcns
             R_squared = 1-(SSres/SStot); % coefficient of determination
         end
         
-        % RGB_assign
-        function out = rgb_assign(data, doc_len, rgb)
-            out = zeros(doc_len,3);
-            
-            for i = 1:doc_len
-                d = data.rec(i,1) - data.rec(1,1);
-                frac = d/(data.rec(end,1)-data.rec(1,1));
-                if (0<=frac)&&(frac<0.1)
-                    out(i,1) = rgb{1,1};
-                    out(i,2) = rgb{1,2};
-                    out(i,3) = rgb{1,3};
-                elseif (0.1<=frac)&&(frac<0.2)
-                    out(i,1) = rgb{2,1};
-                    out(i,2) = rgb{2,2};
-                    out(i,3) = rgb{2,3};
-                elseif (0.2<=frac)&&(frac<0.3)
-                    out(i,1) = rgb{3,1};
-                    out(i,2) = rgb{3,2};
-                    out(i,3) = rgb{3,3};
-                elseif (0.3<=frac)&&(frac<0.4)
-                    out(i,1) = rgb{4,1};
-                    out(i,2) = rgb{4,2};
-                    out(i,3) = rgb{4,3};
-                elseif (0.4<=frac)&&(frac<0.5)
-                    out(i,1) = rgb{5,1};
-                    out(i,2) = rgb{5,2};
-                    out(i,3) = rgb{5,3};
-                elseif (0.5<=frac)&&(frac<0.5)
-                    out(i,1) = rgb{6,1};
-                    out(i,2) = rgb{6,2};
-                    out(i,3) = rgb{6,3};
-                elseif (0.6<=frac)&&(frac<0.7)
-                    out(i,1) = rgb{7,1};
-                    out(i,2) = rgb{7,2};
-                    out(i,3) = rgb{7,3};
-                elseif (0.7<=frac)&&(frac<0.8)
-                    out(i,1) = rgb{8,1};
-                    out(i,2) = rgb{8,2};
-                    out(i,3) = rgb{8,3};
-                elseif (0.8<=frac)&&(frac<0.9)
-                    out(i,1) = rgb{9,1};
-                    out(i,2) = rgb{9,2};
-                    out(i,3) = rgb{9,3};
-                elseif frac>=0.9
-                    out(i,1) = rgb{10,1};
-                    out(i,2) = rgb{10,2};
-                    out(i,3) = rgb{10,3};
-                end
-            end
-        end
-        
         % Read regression csv dataset
-        function [data, rgb, joined_filename] = reg_read_init(joined_filename, doc_len, N_cols, rep_col, ref_col, aH_col)
+        function [data, rgb, joined_filename] = reg_read_init(joined_filename, doc_len, N_cols, rep_col, ref_col, par_col)
+            % DESCRIPTION
+            % Reads (csvread.m, textscan.m) combined csv file containing both reported and reference
+            % data as well as an additional reference parameter column and outputs datetime,
+            % reported cnc, reference cnc and absolute humidity. It also
+            % outputs an rgb colour row for each reference parameter value.
+            % Color based on datetime. Use to initialize regression script.
+            %
+            % SYNOPSIS
+            % Inputs:
+            % - joined_filename: joined csv filename.
+            % - doc_len: document length (-1 for each header-row).
+            % - N_cols: number of document columns.
+            % - rep_col: reported cnc column number.
+            % - ref_col: reference cnc column number.
+            % - par_col : additional reference parameter column number.
+            %
+            % Outputs:
+            % - data: data array of additional parameter colored w.r.t
+            %   datetime.
+            % - rgb: (10,3) rgb table extracted from EMSOL.
+            
+            % SEE ALSO
+            % humidity_fcns: aH_color, scatter_reg_col, scatter_reg_aH_rec.
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
             data.aH = zeros(doc_len,4);
-            loc = table([1;rep_col-1],[1;ref_col-1],[1;aH_col-1], 'VariableNames', {'cnc_rep';'cnc_ref';'aH'});
+            loc = table([1;rep_col-1],[1;ref_col-1],[1;par_col-1], 'VariableNames', {'cnc_rep';'cnc_ref';'aH'});
             data.rep_weC_sens = csvread(joined_filename, loc.cnc_rep(1), loc.cnc_rep(2), [loc.cnc_rep(1) loc.cnc_rep(2) doc_len loc.cnc_rep(2)]);
             data.ref_cnc = csvread(joined_filename, loc.cnc_ref(1), loc.cnc_ref(2), [loc.cnc_ref(1) loc.cnc_ref(2) doc_len loc.cnc_ref(2)]);
             data.aH(:,1) = csvread(joined_filename, loc.aH(1), loc.aH(2), [loc.aH(1) loc.aH(2) doc_len loc.aH(2)]);
             data.rec = textscan(fopen(joined_filename), ['%q' repmat('%*f', [1,N_cols-1])], 'Delimiter', ',', 'HeaderLines', 1);
             data.rec = data.rec{1,1}(:);
-            data.rec(cellfun('isempty', data.rec)) = []; % remove any empty cells 
+            data.rec(cellfun('isempty', data.rec)) = []; % remove any empty cells
             data.rec = datenum(data.rec, 'yyyy-mm-ddTHH:MM:SSZ');
             data.ref_cnc(data.ref_cnc <= 0.1) = NaN; % set ref_rows less than this value to NaN
             
@@ -177,9 +156,25 @@ classdef humidity_fcns
         
         % Color points based on aH value
         function [data, aH, cmap] = aH_color(data, rgb, int_step)
+            % DESCRIPTION
+            % Creates two (x,4) colormap arrays by assigning colors to each aH value based on type
+            % of plot. For collated data charting, aH_int is an array where rgb colors
+            % vary with int_step. For whole data charting, aH_tot is an array
+            % where rgb colors vary dynamically with aH values.
+            %
+            % SYNOPSIS
+            % Outputs:
+            % - data: data structure with removed "aH" field.
+            % - aH: structure containing two colored arrays based on aH value
+            % and type of plot.
+            % - cmap: colormap structure containing the aH intervals and their
+            % respective colors.
+            %
+            % SEE ALSO
+            % humidity_fcns: reg_read_init, scatter_reg_col, scatter_reg_aH_rec.
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
             % for collated data (rgb colors cycle every 1/int_step cells)
-            int_step = 0.1;
             aH_int(:,1) = min(floor(data.aH(:,1))):int_step:max(data.aH(:,1));
             n = 1:10:length(aH_int);
             for i = 1:length(n)
@@ -235,11 +230,33 @@ classdef humidity_fcns
         
         % Regression scatter plot (2D or 3D)
         function scatter_reg_col(model, clr_data, data, init)
+            % DESCRIPTION
+            % Create a 2D scatter plot for the total regression data,
+            % either colored (init.col==1) or uncolored (init.col==0).
+            % If a colored option is chosen then the scatter
+            % points are colored based on the init.col_aH value. If
+            % init.col_aH==1 then points are colored based on aH values,
+            % otherwise color is based off datetime values. Respective
+            % colorbar and regression model results are attached on the
+            % chart.
+            %
+            % SYNOPSIS
+            % Inputs:
+            % - model.cmap.aH_tot: aH colormap for whole dataset.
+            % - model.linear_reg: regression model (fitlm.m).
+            % - clr_data: table(doc_len,5) of reported and reference
+            %   concentrations including respective rgb columns (extracted from data.aH).
+            % - data.aH: aH array(doc_len,4) with corresponding colors
+            %   extracted from model.cmap.aH_tot.
+            %
+            % SEE ALSO
+            % humidity_fcns: reg_read_init, aH_color, scatter_reg_aH_rec.
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
-            col = init.col;  % Simplifying names 
+            col = init.col;  % Simplifying names
             n = init.n;
             if init.col_aH
-            cmap = model.cmap.aH_tot;
+                cmap = model.cmap.aH_tot;
             end
             
             figure('units','normalized','outerposition',[0 0 1 1]);
@@ -312,14 +329,35 @@ classdef humidity_fcns
         end
         
         % Collated regression plot (based on aH_ints)
-        function fig = collated_reg_aH_rec(model, data, rownames, aH_ints, init, n)
+        function fig = collated_reg_aH_rec(model, data, aH_ints, init, n)
+            % DESCRIPTION
+            % Create a 2D scatter plot for each collated regression model,
+            % either colored (init.col==1) or uncolored (init.col==0).
+            % If a colored option is chosen then the scatter
+            % points are colored based on the init.col_aH value. If
+            % init.col_aH==1 then points are colored based on aH values,
+            % otherwise color is based off datetime values. Respective
+            % colorbar and regression model results are attached on the
+            % chart.
+            %
+            % SYNOPSIS
+            % Inputs:
+            % - model.cmap.aH_int: aH colormap for collated data.
+            % - model.linear_reg{n}: current collated regression model (fitlm.m).
+            % - data.aH: aH array(doc_len,4) with corresponding colors
+            %   extracted from model.cmap.aH_int.
+            % - aH_ints: collated data intervals based on aH value.
+            %
+            % SEE ALSO
+            % humidity_fcns: reg_read_init, aH_color, scatter_reg_aH_rec.
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
-            fig = figure('units','normalized','outerposition',[0 0 1 1]);        
+            fig = figure('units','normalized','outerposition',[0 0 1 1]);
             
             if init.col==1
-  
+                rownames = aH_ints.Properties.RowNames; % extract rownames from aH_ints
                 idx.(rownames{n}) = find(data.aH(:,1)>=aH_ints.min_lim(n) & data.aH(:,1)<aH_ints.max_lim(n));
-                if isempty(idx.(rownames{n})) % if no indices extracted, continue to next loop
+                if isempty(idx.(rownames{n})) % if no indices extracted, continue to next loop on caller script
                     fig = {};
                     close(gcf)
                     return
@@ -372,9 +410,13 @@ classdef humidity_fcns
         
         % 3D sphere scatter plot (ideal for around 6000 points)
         function scatter3sph(x, y, z, sf, rgb)
+            % SYNOPSIS
             % Inputs:
-            % sf =  scale factor
-            % rgb = 3-element vector
+            % - x: reference data vector.
+            % - y: reported data vector.
+            % - z: external parameter vector.
+            % - sf: sphere scale factor.
+            % - rgb: 3-element color array.
             
             figure();
             ax = gca;
@@ -393,6 +435,20 @@ classdef humidity_fcns
             light('Position',[1 0 0],'Style','infinite');
             lighting phong
             view(3)
+        end
+        
+        % 3D circle scatter plot
+        function scatter3circ(x, y, z, sz, rgb)
+            % SYNOPSIS
+            % Inputs:
+            % - x: reference data vector.
+            % - y: reported data vector.
+            % - z: external parameter vector.
+            % - sz: circle size (default==15).
+            % - rgb: 3-element color array.
+            
+            figure();
+            scatter3(x, y, z, sz, rgb, 'filled')
         end
     end
 end

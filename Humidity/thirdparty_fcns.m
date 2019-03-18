@@ -159,6 +159,7 @@ classdef thirdparty_fcns
             %
         end
         %----------------------------------------------------------------------END:datenum8601
+       
         function [DtN,Tok] = dn8601Main(TkC)
             % Convert detected substrings into serial date number, create string token.
             %
@@ -202,6 +203,7 @@ classdef thirdparty_fcns
             %
         end
         %----------------------------------------------------------------------END:dn8601Main
+       
         function MtE = dn8601Usr(TkU,TkL,Ntn)
             % Create "regexp" <match> string from user input token.
             %
@@ -244,8 +246,9 @@ classdef thirdparty_fcns
             %
         end
         %----------------------------------------------------------------------END:dn8601Usr
+        
         function b = xlscol(a)
-            %XLSCOL Convert Excel column letters to numbers or vice versa.
+            %   XLSCOL Convert Excel column letters to numbers or vice versa.
             %   B = XLSCOL(A) takes input A, and converts to corresponding output B.
             %   The input may be a number, a string, an array or matrix, an Excel
             %   range, a cell, or a combination of each within a cell, including nested
