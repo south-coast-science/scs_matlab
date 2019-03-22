@@ -1,3 +1,4 @@
+%NOT FULLY OPERATIONAL
 clearvars;
 
 filename = mfilename('fullpath');

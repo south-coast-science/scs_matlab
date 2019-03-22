@@ -1,3 +1,26 @@
+% LIVE CURL DATA IMPORTER & PLOTTER
+%
+% Created 08 December 2018
+%
+%@author Milton Logothetis (milton.logothetis@southcoastscience.com)
+%
+% DESCRIPTION
+% This script utilises cURL in order to import and plot raw live data
+% from a subscribed topic and a specified URL. 
+% 
+% EXAMPLE
+% 1. Specify user-defined variables.
+% 2. Specify parameters to be imported and plotted off subscribed topic:
+% 
+% fmt: {type.data."parameter_name"(var.i,1) = jsondecode(var.i)."JSON_field"}
+% 
+% 3. Specify which parameters to plot within Y_data structure:
+% 
+% fmt (2D): {Y_data."decoded_parameter_name" = [];}
+% 
+% SEE ALSO
+% utilities.multiplot (multiple 2D plot)
+
 clearvars;
 
 % User-defined variables:

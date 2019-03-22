@@ -10,6 +10,7 @@ classdef utilities
     % and plotting the requested data from the scs-matlab curl scripts. It also 
     % contains tools developed for post-processing the imported or 
     % plotted data (csv, pdf write).
+    
     methods(Static)
         
         % cURL importer/decoder functions
