@@ -8,7 +8,7 @@ classdef utilities
     % DESCRIPTION
     % This class contains all of the utility functions for importing, decoding 
     % and plotting the requested data from the scs-matlab scripts. It also 
-    % contains some tools developed for post-processing the imported or 
+    % contains tools developed for post-processing the imported or 
     % plotted data (csv, pdf write).
     
     methods(Static)
@@ -17,6 +17,8 @@ classdef utilities
         %------------------------------------------------------------------
         
         % Get last recorded datetime
+        % RESOURCES
+        % https://github.com/south-coast-science/scs_analysis/wiki/aws_byline
         function start_time = time_init(Topic_ID)
             last_rec = 'aws_byline.py -t %s';
             [~, init_out] = system(sprintf(last_rec, Topic_ID));
@@ -42,6 +44,11 @@ classdef utilities
             %   sample_aggr script is being executed).
             %
             % Output: json_decode, structure containing imported data fields.
+            %
+            % RESOURCES
+            % https://github.com/south-coast-science/scs_analysis/wiki/aws_topic_history
+            % https://github.com/south-coast-science/scs_analysis/wiki/sample_aggregate
+            % https://github.com/south-coast-science/scs_analysis/wiki/node
             
             var_names = evalin('caller','fieldnames(var)');
             exist_end = any(strcmp(var_names,'end_time'));

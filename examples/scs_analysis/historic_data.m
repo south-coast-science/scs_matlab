@@ -25,22 +25,22 @@
 
 clearvars;
 
-filename = mfilename('fullpath');
-[~, var.filename, ~] = fileparts(filename);
-
 % User-defined variables:
 var.Topic_ID = 'unep/ethiopia/loc/1/particulates';
 var.start_time = '2018-12-24T00:00:00Z';
 var.end_time = '2018-12-24T01:00:00Z';
 
 % Initialization
+filename = mfilename('fullpath');
+[~, var.filename, ~] = fileparts(filename);
 jsondecode = utilities.decode_fcn(var); % Import parameters in JSON format. 
 var.sample_length = length(jsondecode);
 hist.last_update = [1;0]; % Indicate data type is raw data.
 
-% Decode parameters from JSON format
 for i = 1:var.sample_length
     var.i = i;
+    
+    % Specify parameters to decode from JSON format:
     type.data.datetime{var.i,1} = jsondecode(var.i).rec;
     type.data.PM1(var.i,1) = jsondecode(var.i).val.pm1;
     type.data.PM2p5(var.i,1) = jsondecode(var.i).val.pm2p5;
@@ -49,9 +49,6 @@ end
 
 live_fig = figure('Name', 'Historic Data');
 
-% Specify parameters for 2D plot.
-% Y_data.PM10 = []; Y_data.PM2p5 = []; Y_data.PM1 = []; 
-% utilities.multiplot(Y_data, type, hist, var, jsondecode, live_fig);
-
-Z_data = type.data.PM10;
-utilities.ddd_surf_plot(Z_data, type, var)
+% Specify parameters for 2D plot:
+Y_data.PM10 = []; Y_data.PM2p5 = []; Y_data.PM1 = []; 
+utilities.multiplot(Y_data, type, hist, var, jsondecode, live_fig);

@@ -7,10 +7,8 @@
 % absolute humidity values using csv_collator.py.
 %
 % RESOURCES
-% csv_reader.py:
-% "https://github.com/south-coast-science/scs_analysis/wiki/csv_reader".
-% csv_collator.py:
-% "https://github.com/south-coast-science/scs_analysis/wiki/csv_collator".
+% https://github.com/south-coast-science/scs_analysis/wiki/csv_reader.
+% https://github.com/south-coast-science/scs_analysis/wiki/csv_collator.
 
 clearvars;
 curr_dir = pwd; % starting directory
