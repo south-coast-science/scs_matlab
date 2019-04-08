@@ -29,27 +29,27 @@
 %% Initialization
 clearvars;
 
-joined_filename = 'praxis_431_LHR2_2019-02-07_2019-03-14_1min_no2b80_rHT.csv';
+joined_filename = 'alphasense_303&ref_2018-08_2019-02_sens_aH_5min.csv';
 
-pollutant = 'NO2';
-doc_len = 48926;
-N_cols = thirdparty_fcns.xlscol('AA');
-rep_col = thirdparty_fcns.xlscol('F');
-ref_col = thirdparty_fcns.xlscol('AA');
-aH_col = thirdparty_fcns.xlscol('U');
+pollutant = 'CO';
+doc_len = 57184;
+N_cols = thirdparty_fcns.xlscol('AC');
+rep_col = thirdparty_fcns.xlscol('U');
+ref_col = thirdparty_fcns.xlscol('AB');
+aH_col = thirdparty_fcns.xlscol('W');
 
 ref = 'ref (ppb)';
-rep = '431 (ppb)';
-init.cbhr_label = 'Relative Humidity (%)'; % East colorbar label. ('Absolute Humidity (\mug/m^3)')
+rep = '303 (ppb)';
+init.cbhr_label = 'Date (dd-mm-yyyy)'; % East colorbar label. ('Absolute Humidity (\mug/m^3)' , 'Relative Humidity (%)', 'Date (dd-mm-yyyy)')
 
 [data, rgb, joined_filename] = humidity_fcns.reg_read_init(joined_filename, doc_len, N_cols, rep_col, ref_col, aH_col);
 
 % % Preprocessing
-% data.ref_cnc(data.ref_cnc>=2) = NaN;
-% data.rep_weC_sens(data.rep_weC_sens>=2000) = NaN;
-% data.rep_weC_sens(data.rep_weC_sens==0) = NaN;
-% data.ref_cnc = data.ref_cnc*1000;
-% data.aH(data.aH(:,1)==0) = NaN; %remove any 0 aH values.
+data.ref_cnc(data.ref_cnc>=2) = NaN;
+data.rep_weC_sens(data.rep_weC_sens>=2000) = NaN;
+data.rep_weC_sens(data.rep_weC_sens==0) = NaN;
+data.ref_cnc = data.ref_cnc*1000;
+data.aH(data.aH(:,1)==0) = NaN; %remove any 0 aH values.
 
 %% Single Linear Regression (color based on rec)
 clearvars -except data rgb joined_filename pollutant ref rep init
@@ -67,7 +67,7 @@ xlabel(sprintf('%s-%s', pollutant, ref)) %('%s-ref (%cC)', pollutant, char(176))
 ylabel(sprintf('%s-%s', pollutant, rep))
 title(sprintf('%s, %s', pollutant, joined_filename))
 
-pdf_name = sprintf('2019-02-07-2019-03-14_LHR2_refx431_%sb500p_1min_total_col_rec.pdf', pollutant);
+pdf_name = sprintf('2018-08-2019-02_6month_alphasense_refx303_%s_5min_total_col_rec.pdf', pollutant);
 utilities.figuretopdf(pdf_name)
 
 %% Single Linear Regression (color based on aH)
@@ -89,15 +89,15 @@ xlabel(sprintf('%s-%s', pollutant, ref))%('%s-ref (%cC)', pollutant, char(176)) 
 ylabel(sprintf('%s-%s', pollutant, rep))
 title(sprintf('%s, %s', pollutant, joined_filename))
 
-pdf_name = sprintf('2019-02-07-2019-03-14_LHR2_refx431_%sb80_1min_total_col_rH.pdf', pollutant);
-%utilities.figuretopdf(pdf_name)
+pdf_name = sprintf('2019-02-07_2019-03-14_LHR2_refx431_%s_15min_total_col_aH.pdf', pollutant);
+utilities.figuretopdf(pdf_name)
 
 %% Linear Regression based on aH_ints
 
 init.col = 1; % Color (col==1 for color)
-init.col_aH = 1; % Color Parameter (col_aH==1 for color based on aH)
+init.col_aH = 0; % Color Parameter (col_aH==1 for color based on aH)
 init.noemptyidx = 0;
-n_ints = 6;
+n_ints = 16;
 
 min_int = floor(min(data.aH(:,1)));
 max_int = ceil(max(data.aH(:,1)));
@@ -105,7 +105,7 @@ collated_spacing = round((max_int-min_int)/n_ints);
 min_lim = transpose(min_int :collated_spacing: max_int-collated_spacing); % Set aH intervals e.g from 1-2, 3-4 (max_lim inclusive).
 max_lim = transpose(min_int+collated_spacing :collated_spacing: max_int);
 for n = 1:length(min_lim)
-rownames{n,1} = sprintf('rH_%d_%d', min_lim(n), max_lim(n));
+rownames{n,1} = sprintf('aH_%d_%d', min_lim(n), max_lim(n));
 end
 aH_ints = table(min_lim, max_lim, 'RowNames', rownames);
 
@@ -129,5 +129,5 @@ for n=1:height(aH_ints)-1
     ttle = title(sprintf('Linear regression of %s praxis %svs%s, %s', pollutant, ref, rep, rownames{n}));
     % pdf_name = sprintf('2018-08_2019-02_alphasense_refx303_CO_5min_%s.pdf', rownames{n});
     % utilities.figuretopdf(pdf_name)
-    %export_fig(sprintf('2019-02-07-2019-03-14_LHR2_refx431_%sb500p_1min_collated_col_rH.pdf', pollutant), fig{n}, '-append')
+    export_fig(sprintf('2018-08-2019-02_6month_alphasense_refx303_%s_5min_collated_col_rec.pdf', pollutant), fig{n}, '-append')
 end

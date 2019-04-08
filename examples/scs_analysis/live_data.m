@@ -12,7 +12,7 @@
 % 1. Specify user-defined variables.
 % 2. Specify parameters to be imported and plotted off subscribed topic:
 % 
-% fmt: {type.data."parameter_name"(var.i,1) = jsondecode(var.i)."JSON_field"}
+% fmt: {type.data."parameter_name"(var.i+n-1,1) = jsondecode{var.j,1}(n)."JSON_field"}
 % 
 % 3. Specify which parameters to plot within Y_data structure:
 % 

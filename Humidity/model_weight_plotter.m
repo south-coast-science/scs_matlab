@@ -1,24 +1,46 @@
 clearvars -except type ref 
 
+%% CSV reader
+var.filename_ref = 'praxis_501_gases_2019-01-12_2019-01-13.csv';
+reader_cmd = 'csv_reader.py %s | node.py -a';
+[~, out_ref] = system(sprintf(reader_cmd, var.filename_ref));
+jsondecode_ref = jsondecode(out_ref);
+
+for n=1:length(jsondecode_ref)
+    type.data.datetime{n,1} = jsondecode_ref(n).rec;
+    type.data.NO2_wec(n,1) = jsondecode_ref(n).val.NO2.weC;
+end
+type.data.datetime_ref = datenum(type.data.datetime, 'yyyy-mm-ddTHH:MM:SS'); 
+
+%% Direct data import
+type.data.datetime = praxis501gases2019011220190113.rec;
+type.data.NO2_weC = praxis501gases2019011220190113.valNO2weC;
+type.data.NO2_cnc = praxis501gases2019011220190113.valNO2cnc;
+type.data.tmp = praxis501gases2019011220190113.valshttmp;
+type.data.hmd = praxis501gases2019011220190113.valshthmd;
+
+%% Preprocessing & plotting
 gasColor = [0.4353 0.1412 0.0863];
 tmpColor = [0.6510 0.1686 0.0902];
 hmdColor = [0.1176 0.2980 0.4863];
 pollutant = 'NO2 (ppb)';
 
-[aH,RH] = abs_humidity(type); % (g/m^3)
+[aH,RH] = humidity_fcns.abs_humidity(type.data); % (g/m^3)
 fnames = fieldnames(type.data);
-gas_orig = type.data.(fnames{2});
-weC = type.data.NO2_wec;
+gas_orig = type.data.NO2_cnc;
+weC = type.data.NO2_weC;
 X_data = cellfun(@thirdparty_fcns.datenum8601, cellstr(type.data.datetime));
 
-wb = -4;
-ws = 4;
-sens = 0.257/1000; % unique to sensor, at 20oC & aH=
+wb = 0;
+ws = 1;
+sens = 0.264/1000; % unique to sensor, at 20oC & aH=
 baseline_corr = wb * aH; % error 1
 % e = -w*RH*100; % error 2
 sens_corr = sens*((aH/ws)+1); % error 3
+% cnc_sens_corr = 0;
 cnc_sens_corr = weC./sens_corr;
 cnc_baseline_corr = cnc_sens_corr - baseline_corr;
+% cnc_baseline_corr = baseline_corr;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Gradient
 % for n = 1:(length(gas_corr)-5)
@@ -29,7 +51,7 @@ cnc_baseline_corr = cnc_sens_corr - baseline_corr;
 % end
 % X_data_grad = X_data(6:end);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-pdf_name = 'chigwell_field_gases_2018-10-03_NO2_wb%d_ws%d';
+pdf_name = 'praxis_501_gases_2019-01-12_2019-01-13_NO2_wb%d_ws%d';
 pdf_name = sprintf(pdf_name, wb, ws);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plot 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

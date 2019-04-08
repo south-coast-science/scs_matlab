@@ -359,7 +359,7 @@ classdef utilities
             x = t-x_integ;
             
             x = x*day_vals;
-            x(x==0)=day_vals;
+            x(x==0) = day_vals;
             y = floor(t); % start day
             difff = diff(y); % aggregate interval
             day_num = sum(difff~=0); 

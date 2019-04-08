@@ -119,7 +119,7 @@ classdef humidity_fcns
             data.ref_cnc = csvread(joined_filename, loc.cnc_ref(1), loc.cnc_ref(2), [loc.cnc_ref(1) loc.cnc_ref(2) doc_len loc.cnc_ref(2)]);
             data.aH(:,1) = csvread(joined_filename, loc.aH(1), loc.aH(2), [loc.aH(1) loc.aH(2) doc_len loc.aH(2)]);
             data.rec = textscan(fopen(joined_filename), ['%q' repmat('%*f', [1,N_cols-1])], 'Delimiter', ',', 'HeaderLines', 1);
-            data.rec = data.rec{1,1}(:);
+            data.rec = data.rec{:};
             data.rec(cellfun('isempty', data.rec)) = []; % remove any empty cells
             data.rec = datenum(data.rec, 'yyyy-mm-ddTHH:MM:SSZ');
             data.ref_cnc(data.ref_cnc <= 0.1) = NaN; % set ref_rows less than this value to NaN
@@ -291,6 +291,7 @@ classdef humidity_fcns
                     end
                     tick_lbl(end+1,1) = data.rec(end,1);
                     cbhr.TickLabels = {datestr(tick_lbl, 'dd-mm-yyyy')};
+                    ylabel(cbhr, init.cbhr_label)
                 else
                     % East colorbar
                     colormap(cbhr, cmap(:,2:4))
@@ -375,21 +376,22 @@ classdef humidity_fcns
                 plot(clr_data.Var1, m*clr_data.Var1 + b, 'LineWidth', 0.7, 'Color', 'r')
                 hold off
                 
-                cbh = colorbar;
+                cbhr = colorbar;
                 count=0;
                 if init.col_aH==0
                     colormap(data.aH(:,2:4))
-                    for i = 1:round(length(data.rec)/(length(cbh.Ticks)-1)):length(data.rec)
+                    for i = 1:round(length(data.rec)/(length(cbhr.Ticks)-1)):length(data.rec)
                         count=count+1;
                         tick_lbl(count,1) = data.rec(i,1);
                     end
                     tick_lbl(end+1, 1) = data.rec(end,1);
-                    cbh.TickLabels = {datestr(tick_lbl, 'dd-mm-yyyy')};
+                    cbhr.TickLabels = {datestr(tick_lbl, 'dd-mm-yyyy')};
+                    ylabel(cbhr, init.cbhr_label)
                 else
                     colormap(model.cmap.aH_int(1:10,2:4)) % essentially the same as rgb table
                     tick_lbl(1:11,1) = aH_ints.min_lim(n):init.int_step:aH_ints.max_lim(n);
-                    cbh.TickLabels = tick_lbl;
-                    ylabel(cbh, init.cbhr_label)
+                    cbhr.TickLabels = tick_lbl;
+                    ylabel(cbhr, init.cbhr_label)
                 end
             elseif init.col==0
                 plot(model.linear_reg{n})
