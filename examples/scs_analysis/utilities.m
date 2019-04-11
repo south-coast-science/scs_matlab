@@ -23,7 +23,7 @@ classdef utilities
             last_rec = 'aws_byline.py -t %s';
             [~, init_out] = system(sprintf(last_rec, Topic_ID));
             init_out = jsondecode(init_out);
-            start_time = init_out.rec;
+            start_time = init_out.last_write;
         end
         
         % Historic/Aggregated data importer/decoder
