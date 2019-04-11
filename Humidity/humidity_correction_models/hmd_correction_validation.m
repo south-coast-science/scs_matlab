@@ -1,7 +1,7 @@
 clearvars;
 
 joined_filename = 'praxis_ref_joined_ah_short_corr3.csv'; 
-T = readtable(joined_filename); % Read filename as table
+T = readtable(joined_filename); % Read file as table
 
 % Specify rec column name (e.g datenum(T."rec_name", '...')):
 rec = datenum(T.rec, 'yyyy-mm-ddTHH:MM:SSZ'); 
@@ -10,7 +10,7 @@ refname = 'ref.15 minute "real" data';
 repname = 'praxis.val.NO2.cnc';
 corrname = 'praxis.val.NO2.cnc-ah-corr';
 % Specify external parameter column name:
-ext_par = 'praxis.val.sht.tmp';
+ext_par = 'praxis.val.sht.hmd.rH';
 
 % Specify colors:
 cncCol = [51 51 255; 255 153 51; 102 204 0]/255;
@@ -46,7 +46,7 @@ for i = 1:length(fnamesvar)
 end
 varext.(fnamesvarext{1}) = T.(varext.(fnamesvarext{1})); % external parameter values
 
-% Plotting 
+% Plotting: 
 % Subplot 1 (Concentrations)
 fig = figure();
 sb1 = subplot(2,1,1);
@@ -69,7 +69,7 @@ end
 grid minor
 datetick('x', 'dd-mmm-yy HH:MM', 'keepticks', 'keeplimits');
 
-% Plot properties
+% Plot properties:
 title(sb1, 'Correction of external factors affecting cnc')
 ylabel(sb1, 'Concentration (ppb)')
 ylabel(sb2, 'Temperature (\circC)')
