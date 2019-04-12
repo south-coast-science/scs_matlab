@@ -24,8 +24,6 @@ Z = X.*mT_poly + cT_poly; % plot polynomial model
 
 figure();
 h = surf(X,Y,Z);
-fvc=u3d_pre;
-mesh_to_latex('test.u3d',fvc.vertices, uint32(fvc.faces),fvc.facevertexcdata);
 
 shading interp
 colormap spring
