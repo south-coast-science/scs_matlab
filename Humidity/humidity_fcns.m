@@ -281,7 +281,6 @@ classdef humidity_fcns
                 hold off
                 
                 cbhr = colorbar('eastoutside');
-                %cbhb = colorbar('southoutside');
                 count=0;
                 if init.col_aH==0
                     colormap(data.aH(:,2:4))

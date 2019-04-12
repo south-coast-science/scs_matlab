@@ -25,6 +25,9 @@
 % - Wherever aH (absolute humidity) is used as a coloring
 %   or collation reference it can be replaced by any other variable from the
 %   imported dataset(e.g. relative humidity, temperature etc).
+% 
+% SEE ALSO:
+% https://uk.mathworks.com/matlabcentral/fileexchange/23629-export_fig
 
 %% Initialization
 clearvars;
@@ -68,7 +71,7 @@ ylabel(sprintf('%s-%s', pollutant, rep))
 title(sprintf('%s, %s', pollutant, joined_filename))
 
 pdf_name = sprintf('2018-08-2019-02_6month_alphasense_refx303_%s_5min_total_col_rec.pdf', pollutant);
-utilities.figuretopdf(pdf_name)
+% utilities.figuretopdf(pdf_name)
 
 %% Single Linear Regression (color based on aH)
 clearvars -except data rgb joined_filename pollutant ref rep init
@@ -90,7 +93,7 @@ ylabel(sprintf('%s-%s', pollutant, rep))
 title(sprintf('%s, %s', pollutant, joined_filename))
 
 pdf_name = sprintf('2019-02-07_2019-03-14_LHR2_refx431_%s_15min_total_col_aH.pdf', pollutant);
-utilities.figuretopdf(pdf_name)
+% utilities.figuretopdf(pdf_name)
 
 %% Linear Regression based on aH_ints
 
@@ -127,7 +130,9 @@ for n=1:height(aH_ints)-1
     ylabel(sprintf('%s-%s', pollutant, rep))
     rownames{n} = strrep(rownames{n}, '_', '-');
     ttle = title(sprintf('Linear regression of %s praxis %svs%s, %s', pollutant, ref, rep, rownames{n}));
-    % pdf_name = sprintf('2018-08_2019-02_alphasense_refx303_CO_5min_%s.pdf', rownames{n});
+    pdf_name = sprintf('2018-08_2019-02_alphasense_refx303_CO_5min_%s.pdf', rownames{n});
+    % Append all pdf's into one pdf file
+    % export_fig(sprintf('2018-08-2019-02_6month_alphasense_refx303_%s_5min_collated_col_rec.pdf', pollutant), fig{n}, '-append')
+    % Save each collated interval as single pdf:
     % utilities.figuretopdf(pdf_name)
-    export_fig(sprintf('2018-08-2019-02_6month_alphasense_refx303_%s_5min_collated_col_rec.pdf', pollutant), fig{n}, '-append')
 end
