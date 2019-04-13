@@ -12,15 +12,15 @@ tmp = tmp(1):rt:tmp(2);
 rH = rH(1):rh:rH(2);
 
 % linear
-mT = (0.0844 * rH) - 6.7187;
-cT = (-1.0479 * rH) + 98.792;
+mT = (0.0844 .* rH) - 6.7187;
+cT = (-1.0479 .* rH) + 98.792;
 % polynomial for T+2, rH-3
 mT_poly = -0.0009*rH.^2 + 0.1231*rH -4.3593;
 cT_poly = -0.0123*rH.^2 + 1.9361*rH - 55.81;
 
 [X,Y] = meshgrid(tmp, rH);
-%Z = X.*mT + cT; % plot linear model
-Z = X.*mT_poly + cT_poly; % plot polynomial model
+%Z = X.*mT(:) + cT(:); % plot linear model
+Z = X.*mT_poly(:) + cT_poly(:); % plot polynomial model
 
 figure();
 h = surf(X,Y,Z);
